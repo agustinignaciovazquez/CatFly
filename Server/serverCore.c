@@ -1,6 +1,7 @@
 /* Server Core */
 
 #include "serverCore.h"
+#include "commandParser.h"
 #include "semaphores.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,15 +11,16 @@
 
 int createServerSocket(const char * address, int port);
 void clientHandler(int socket);
+void configureServerSettings(const char * address, int port, struct sockaddr_in * serverAddr);
 
-int initializeServer(){
+int initializeServer(const char * address, int port){
 	int incomingSocket, acceptSocket, pid;
 	struct sockaddr_in clientAddr;
 	socklen_t addr_size;
 	struct timeval tv; //Timeout
 	sem_t * childSemaphore;
 
-	incomingSocket = createServerSocket(SERVER_ADDR,SERVER_PORT);
+	incomingSocket = createServerSocket(address, port);
 	if(incomingSocket == SERVER_INIT_ERROR)
 		return SERVER_INIT_ERROR;
 	 
@@ -42,17 +44,19 @@ int initializeServer(){
 			pid = fork();
 			if(pid < 0){
 				printf("Error: Fork failed \n");
-				exit(SERVER_INIT_ERROR);			
+				exit(SERVER_CHILD_ERROR);			
 			}
 			if(pid == 0){
 				//Child process
-				close(incomingSocket);
 				printf("Client connected\n");
+				close(incomingSocket);
+				
 				clientHandler(acceptSocket);
-				close(acceptSocket);
+
 				printf("Client disconnected\n");
+				close(acceptSocket);
 				sem_post(childSemaphore);
-				exit(SERVER_EXIT);
+				exit(SERVER_EXIT); //end proccess and send ok signal to parent ps
 			}else{
 				close(acceptSocket);
 			}
@@ -62,17 +66,36 @@ int initializeServer(){
 }
 
 void clientHandler(int socket){
-	int n;
-	char buffer[256];
-	bzero(buffer,256);
+	int read_size, write_size, response_size;
+	char read_buffer[SERVER_MAX_INPUT_LENGTH];
+	char * response_buffer;
+
 	while(1){
-		n = read(socket,buffer,255);
-		if(n < 0){
-			//Error reading from pipe
+		//Fill buffer with zeros
+		bzero(read_buffer,SERVER_MAX_INPUT_LENGTH); // not neccessary?
+
+		//Receive data from socket
+		read_size = recv(socket,read_buffer,SERVER_MAX_INPUT_LENGTH-1,0);
+		if(read_size == 0)
+			return; //client disconnected
+		if(read_size < 0){
+			printf("Error: Reading from Socket\n");
 			return;
 		}
-		printf("%s",buffer);
+
+		response_buffer = getResponse(read_buffer, read_size, &response_size);
+		if(response_buffer == NULL){
+			printf("Error: Parsing request ... forcing client to disconnect \n");
+			return;
+		}
+
+		write_size = write(socket, response_buffer, response_size);
+		if(write_size < 0){
+			printf("Error: Writing to Socket\n");
+			return;
+		}
 	}
+
 	return;
 }
 
@@ -90,10 +113,7 @@ int createServerSocket(const char * address, int port){
 	}
 
 	//Configure the Server settings
-	serverAddr.sin_family = AF_INET; //Internet address
-	serverAddr.sin_port = htons(port); //Port using htons for proper byte order
-	serverAddr.sin_addr.s_addr = inet_addr(address);
-	memset(serverAddr.sin_zero, 0, sizeof serverAddr.sin_zero); //? Set all bits of the padding field to 0 ?
+	configureServerSettings(address, port, &serverAddr);
 	
 	if((bind(incomingSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr))) < 0){
 		printf("Error: Binding failed in address %s \n", address);
@@ -104,11 +124,14 @@ int createServerSocket(const char * address, int port){
 		printf("Error: Listening failed in port %d \n", port);
 		return SERVER_INIT_ERROR;
 	}
+
 	printf("Listening on port %d \n",port);
 	return incomingSocket;
 }
-
-int main(int argc , char *argv[]){
-  	initializeServer();
-    return 0;
-}   
+  
+void configureServerSettings(const char * address, int port, struct sockaddr_in * serverAddr){
+	serverAddr->sin_addr.s_addr = inet_addr(address);
+	serverAddr->sin_family = AF_INET; //Internet address
+	serverAddr->sin_port = htons(port); //Port using htons for proper byte order
+	memset(serverAddr->sin_zero, 0, sizeof serverAddr->sin_zero); //? Set all bits of the padding field to 0 ?
+}
