@@ -4,6 +4,7 @@
 #include <string.h>
 
 int enableFK(sqlite3 * db);
+int openAndExecDB(char * * sql);
 
 int openDatabase(sqlite3 * * db){
 	int rc;
@@ -22,24 +23,38 @@ int openDatabase(sqlite3 * * db){
 
 /*Function returns SQLITE_OK IF DB EXISTS*/
 int checkDB(){
-	int rc;
+	char * queries[] = {DB_CHECK_QUERY, 0};
+	return openAndExecDB(queries);
+}
+
+/*Function returns SQLITE_OK IF IT INSTALLS DB SUCCESSFULLY*/
+int installDB(){
+	char * queries[] = {DB_CREATE_FLIGHTS_QUERY, DB_CREATE_PLANES_QUERY, DB_CREATE_RESERVATIONS_QUERY, 0};
+	return openAndExecDB(queries);
+}
+
+/*Executes and array of queries */
+int openAndExecDB(char * * sqlQueries){
+	int rc,i;
 	sqlite3 * db;
-	char * sql = "SELECT * FROM flights, planes, reservations";
 
 	rc = openDatabase(&db);
 	if(rc != SQLITE_OK)
 		return rc;
 
-	rc = executeStaticSQL(db,sql);
-	if(rc != SQLITE_OK)
-		fprintf(stderr,"Error: %s in DB\n", sqlite3_errmsg(db));
+	for(i=0; sqlQueries[i] != 0; i++){
+		rc = executeStaticSQL(db,sqlQueries[i]);
+		if(rc != SQLITE_OK)
+			fprintf(stderr,"Error: %s in DB\n", sqlite3_errmsg(db));
+	}
 
+	closeDatabase(db);
 	return rc;
 }
 
 void closeDatabase(sqlite3 * db){
 	sqlite3_close(db);
-	printf("DB closed\n");
+	//printf("DB closed\n");
 }
 
 int enableFK(sqlite3 * db){

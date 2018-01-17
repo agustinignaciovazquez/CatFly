@@ -12,8 +12,10 @@ int main(int argc , char *argv[]){
   	int status;
 
   	if(checkDB() != SQLITE_OK){
-  		printf("Please install the DB prior execution of Server\n");
-  		return SERVER_DB_ERROR;
+  		printf("Installing empty DB\n");
+  		if(installDB() != SQLITE_OK)
+  			return SERVER_DB_ERROR;
+  		printf("DB Installed successfully!\n");
   	}
 
   	status = initializeServer(SERVER_ADDR,SERVER_PORT);
