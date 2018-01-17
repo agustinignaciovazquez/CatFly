@@ -16,5 +16,12 @@ typedef struct{
 	int columns;
 }Plane;
 
+typedef struct{
+	char * flightCode;
+	int seatRow;
+	int seatColumn;
+	char * passportID;
+}Reservation;
+
 #endif
  

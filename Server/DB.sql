@@ -11,11 +11,12 @@ CREATE TABLE flights(
 CREATE TABLE planes(
 	model TEXT NOT NULL CHECK(LENGTH("model") <= 10),
 	rows INT NOT NULL CHECK(rows > 0 AND rows < 99),
-	columns INT NOT NULL CHECK(columns > 0 AND columns < 14)
+	columns INT NOT NULL CHECK(columns > 0 AND columns < 99)
 );
-CREATE TABLE reservation(
+CREATE TABLE reservations(
 	flightCode TEXT PRIMARY KEY NOT NULL CHECK(LENGTH("flightCode") = 4),
-	seat TEXT NOT NULL CHECK(LENGTH("seat") = 3),
+	seatRow INT NOT NULL CHECK(seatRow > 0 AND seatRow < 99),
+	seatColumn INT NOT NULL CHECK(seatColumn > 0 AND seatColumn < 99),
 	passportID TEXT NOT NULL CHECK(LENGTH("passportID") >= 7 AND LENGTH("passportID") <= 10),
 	PRIMARY KEY (flightCode,seat),
 	FOREIGN KEY (flightCode) REFERENCES flights(flightCode)

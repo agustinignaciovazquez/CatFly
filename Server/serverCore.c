@@ -38,12 +38,12 @@ int initializeServer(const char * address, int port){
 		//Set the timeout to the socket
 		setsockopt(acceptSocket, SOL_SOCKET, SO_RCVTIMEO, (const struct timeval *)&tv,sizeof(struct timeval)); 
 		if(acceptSocket < 0){
-			printf("Error: Accepting incoming connection \n");
+			fprintf(stderr,"Error: Accepting incoming connection \n");
 		}else{
 			sem_wait(childSemaphore);
 			pid = fork();
 			if(pid < 0){
-				printf("Error: Fork failed \n");
+				fprintf(stderr,"Error: Fork failed \n");
 				exit(SERVER_CHILD_ERROR);			
 			}
 			if(pid == 0){
@@ -79,19 +79,19 @@ void clientHandler(int socket){
 		if(read_size == 0)
 			return; //client disconnected
 		if(read_size < 0){
-			printf("Error: Reading from Socket\n");
+			fprintf(stderr,"Error: Reading from Socket\n");
 			return;
 		}
 
 		response_buffer = getResponse(read_buffer, read_size, &response_size);
 		if(response_buffer == NULL){
-			printf("Error: Parsing request ... forcing client to disconnect \n");
+			fprintf(stderr,"Error: Parsing request ... forcing client to disconnect \n");
 			return;
 		}
 
 		write_size = write(socket, response_buffer, response_size);
 		if(write_size < 0){
-			printf("Error: Writing to Socket\n");
+			fprintf(stderr,"Error: Writing to Socket\n");
 			return;
 		}
 	}
@@ -109,19 +109,19 @@ int createServerSocket(const char * address, int port){
 
 	//Set socket to allow reuse of local addresses
 	if (setsockopt(incomingSocket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(enabled)) < 0){
-    	printf("Error: setsockopt(SO_REUSEADDR) failed\n");
+    	fprintf(stderr,"Error: setsockopt(SO_REUSEADDR) failed\n");
 	}
 
 	//Configure the Server settings
 	configureServerSettings(address, port, &serverAddr);
 	
 	if((bind(incomingSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr))) < 0){
-		printf("Error: Binding failed in address %s \n", address);
+		fprintf(stderr,"Error: Binding failed in address %s \n", address);
 		return SERVER_INIT_ERROR;
 	}
 
 	if((listen(incomingSocket,SERVER_MAX_QUEUE_REQUEST)) < 0){
-		printf("Error: Listening failed in port %d \n", port);
+		fprintf(stderr,"Error: Listening failed in port %d \n", port);
 		return SERVER_INIT_ERROR;
 	}
 

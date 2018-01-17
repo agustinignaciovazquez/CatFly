@@ -11,6 +11,7 @@
 
 #define SERVER_INIT_ERROR -1
 #define SERVER_CHILD_ERROR -2
+#define SERVER_DB_ERROR -3
 #define SERVER_EXIT 0
 
 int initializeServer(const char * address, int port);
