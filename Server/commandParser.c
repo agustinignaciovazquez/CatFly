@@ -5,5 +5,5 @@
 
 char * getResponse(const char * command, int size, int * response_bytes){
 	*response_bytes = 5;
-	return "HOLA";
+	return "TEST";
 } 

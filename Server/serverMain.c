@@ -1,5 +1,6 @@
 #include "serverCore.h"
 #include "semaphores.h"
+#include "databaseCore.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  
@@ -9,7 +10,8 @@
 
 int main(int argc , char *argv[]){
   	int status;
-  	
+  	sqlite3 * db;
+  	openDatabase(&db);
   	status = initializeServer(SERVER_ADDR,SERVER_PORT);
   	if(status == SERVER_INIT_ERROR){
   		printf("Error: Server could not be initiated\n");

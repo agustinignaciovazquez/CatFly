@@ -5,7 +5,7 @@
 #include "semaphores.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>    //strlen
+#include <string.h>
 
 #define _SEMAPHORE_CHILD_NAME_ "CHILD_SEMAPHORE_SRV"
 
