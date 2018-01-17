@@ -18,6 +18,6 @@ CREATE TABLE reservations(
 	seatRow INT NOT NULL CHECK(seatRow > 0 AND seatRow < 99),
 	seatColumn INT NOT NULL CHECK(seatColumn > 0 AND seatColumn < 99),
 	passportID TEXT NOT NULL CHECK(LENGTH("passportID") >= 7 AND LENGTH("passportID") <= 10),
-	PRIMARY KEY (flightCode,seat),
+	PRIMARY KEY (flightCode,seatRow,seatColumn),
 	FOREIGN KEY (flightCode) REFERENCES flights(flightCode)
 );
