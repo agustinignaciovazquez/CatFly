@@ -44,8 +44,10 @@ int openAndExecDB(char * * sqlQueries){
 
 	for(i=0; sqlQueries[i] != 0; i++){
 		rc = executeStaticSQL(db,sqlQueries[i]);
-		if(rc != SQLITE_OK)
+		if(rc != SQLITE_OK){
 			fprintf(stderr,"Error: %s in DB\n", sqlite3_errmsg(db));
+			return rc;
+		}
 	}
 
 	closeDatabase(db);

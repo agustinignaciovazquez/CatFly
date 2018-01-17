@@ -17,7 +17,7 @@
 #define R_SEAT_COLUMN_COLUMN 2
 #define R_PASSPORTID_COLUMN 3
 
-#define DB_CHECK_QUERY "SELECT * FROM flights, planes, reservations"
+#define DB_CHECK_QUERY "SELECT * FROM flights, planes, reservations;"
 
 //use https://www.freeformatter.com/java-dotnet-escape.html#ad-output to escape the string
 
