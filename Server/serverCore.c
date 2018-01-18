@@ -12,9 +12,30 @@
 int createServerSocket(const char * address, int port);
 void clientHandler(int socket);
 void configureServerSettings(const char * address, int port, struct sockaddr_in * serverAddr);
+void sigchld_handler(int signal);
+void sigterm_handler(int signal);
+
+int incomingSocket, acceptSocket; //Global variables so it can be used in signalHandler for signal SIGTERM
+
+int initializeServerForeground(const char * address, int port){
+	int p;
+
+	p = fork();
+	if(pid < 0){
+		fprintf(stderr,"Error: Fork failed \n");
+		return SERVER_INIT_ERROR;			
+	}
+	
+	if(pid == 0){
+		//Daemon child
+		initializeServer(address,port);
+	}
+
+	return SERVER_EXIT;
+}
 
 int initializeServer(const char * address, int port){
-	int incomingSocket, acceptSocket, pid;
+	int pid;
 	struct sockaddr_in clientAddr;
 	socklen_t addr_size;
 	struct timeval tv; //Timeout
@@ -29,6 +50,11 @@ int initializeServer(const char * address, int port){
 	//Set the timeout interval
 	tv.tv_usec = 0; 
 	tv.tv_sec = SERVER_TIMEOUT; 
+
+	//Prevent ended children from becoming zombies 
+	signal(SIGCHLD, sigchld_handler); 
+	//handle KILL signal
+    signal(SIGTERM, sigterm_handler); 
 
 	//Open the childs semaphore
 	childSemaphore = openChildsSemaphore(_SEMAPHORE_CHILD_NAME_);
@@ -63,6 +89,18 @@ int initializeServer(const char * address, int port){
 		}
 	}
 	return SERVER_EXIT;
+}
+
+/* Handle finished child process (Source: https://github.com/kklis/proxy/blob/master/proxy.c;)*/
+void sigchld_handler(int signal) {
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
+
+/* Handle term signal */
+void sigterm_handler(int signal) {
+    close(acceptSocket);
+    close(incomingSocket);
+    exit(SERVER_EXIT);
 }
 
 void clientHandler(int socket){
@@ -100,33 +138,33 @@ void clientHandler(int socket){
 }
 
 int createServerSocket(const char * address, int port){
-	int incomingSocket;
+	int serverSocket;
 	struct sockaddr_in serverAddr;
 	int enabled = 1;
 
 	//Create socket w/ Internet Domain, Stream Socket, TCP (Default)
-	incomingSocket = socket(PF_INET,SOCK_STREAM,0);
+	serverSocket = socket(PF_INET,SOCK_STREAM,0);
 
 	//Set socket to allow reuse of local addresses
-	if (setsockopt(incomingSocket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(enabled)) < 0){
+	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(enabled)) < 0){
     	fprintf(stderr,"Error: setsockopt(SO_REUSEADDR) failed\n");
 	}
 
 	//Configure the Server settings
 	configureServerSettings(address, port, &serverAddr);
 	
-	if((bind(incomingSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr))) < 0){
+	if((bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr))) < 0){
 		fprintf(stderr,"Error: Binding failed in address %s \n", address);
 		return SERVER_INIT_ERROR;
 	}
 
-	if((listen(incomingSocket,SERVER_MAX_QUEUE_REQUEST)) < 0){
+	if((listen(serverSocket,SERVER_MAX_QUEUE_REQUEST)) < 0){
 		fprintf(stderr,"Error: Listening failed in port %d \n", port);
 		return SERVER_INIT_ERROR;
 	}
 
 	printf("Listening on port %d \n",port);
-	return incomingSocket;
+	return serverSocket;
 }
   
 void configureServerSettings(const char * address, int port, struct sockaddr_in * serverAddr){

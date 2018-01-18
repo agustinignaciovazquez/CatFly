@@ -11,6 +11,7 @@ sem_t * openSemaphore(const char * semaphoreKey, int val){
 
     if(semaphore == SEM_FAILED){
         printf("Error: Opening semaphore %s\n", semaphoreKey);
+        return NULL;
     }
     //Destroy semaphore once all other processes that have the semaphore open close it.
     sem_unlink (semaphoreKey); 
