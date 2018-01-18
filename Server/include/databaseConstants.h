@@ -18,7 +18,7 @@
 #define R_PASSPORTID_COLUMN 3
 
 #define DB_CHECK_QUERY "SELECT * FROM flights, planes, reservations;"
-
+#define DB_ENABLE_FK "PRAGMA foreign_keys = ON;"
 //use https://www.freeformatter.com/java-dotnet-escape.html#ad-output to escape the string
 
 #define DB_CREATE_FLIGHTS_QUERY "CREATE TABLE flights(\

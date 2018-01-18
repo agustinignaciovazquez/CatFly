@@ -10,9 +10,10 @@ apt-get install libsqlite3-dev
 #include "databaseConstants.h"
 #define DB_FILENAME "data.db"
 
-int checkDB();
-int installDB();
+int checkDB(sqlite3 * db);
+int installDB(sqlite3 * db);
 int openDatabase(sqlite3 * * db);
+int openAndExecDB(sqlite3 * db, char * * sqlQueries);
 int executeStaticSQL(sqlite3 * db, const char * sql);
 void closeDatabase(sqlite3 * db);
 

@@ -4,7 +4,6 @@
 #include <string.h>
 
 int enableFK(sqlite3 * db);
-int openAndExecDB(char * * sql);
 
 int openDatabase(sqlite3 * * db){
 	int rc;
@@ -22,25 +21,20 @@ int openDatabase(sqlite3 * * db){
 }
 
 /*Function returns SQLITE_OK IF DB EXISTS*/
-int checkDB(){
+int checkDB(sqlite3 * db){
 	char * queries[] = {DB_CHECK_QUERY, 0};
-	return openAndExecDB(queries);
+	return openAndExecDB(db, queries);
 }
 
 /*Function returns SQLITE_OK IF IT INSTALLS DB SUCCESSFULLY*/
-int installDB(){
+int installDB(sqlite3 * db){
 	char * queries[] = {DB_CREATE_FLIGHTS_QUERY, DB_CREATE_PLANES_QUERY, DB_CREATE_RESERVATIONS_QUERY, 0};
-	return openAndExecDB(queries);
+	return openAndExecDB(db, queries);
 }
 
 /*Executes and array of queries */
-int openAndExecDB(char * * sqlQueries){
+int openAndExecDB(sqlite3 * db, char * * sqlQueries){
 	int rc,i;
-	sqlite3 * db;
-
-	rc = openDatabase(&db);
-	if(rc != SQLITE_OK)
-		return rc;
 
 	for(i=0; sqlQueries[i] != 0; i++){
 		rc = executeStaticSQL(db,sqlQueries[i]);
@@ -50,7 +44,6 @@ int openAndExecDB(char * * sqlQueries){
 		}
 	}
 
-	closeDatabase(db);
 	return rc;
 }
 
@@ -60,14 +53,14 @@ void closeDatabase(sqlite3 * db){
 }
 
 int enableFK(sqlite3 * db){
-	int rc;
-   char * sql = "PRAGMA foreign_keys = ON;";
-   
-   rc = executeStaticSQL(db,sql);
+	int rc;   
+   rc = executeStaticSQL(db,DB_ENABLE_FK);
+
    if(rc != SQLITE_OK){
 		fprintf(stderr,"Error: Enabling Foreign Key support %s\n", sqlite3_errmsg(db));
 		sqlite3_close(db);
 	}
+	
 	return rc;
 }
 

@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 #define _SEMAPHORE_CHILD_NAME_ "CHILD_SEMAPHORE_SRV"
 
@@ -21,17 +23,18 @@ int initializeServerForeground(const char * address, int port){
 	int p;
 
 	p = fork();
-	if(pid < 0){
+	if(p < 0){
 		fprintf(stderr,"Error: Fork failed \n");
 		return SERVER_INIT_ERROR;			
 	}
 	
-	if(pid == 0){
+	if(p == 0){
 		//Daemon child
 		initializeServer(address,port);
+		return SERVER_EXIT;
 	}
 
-	return SERVER_EXIT;
+	return SERVER_FOREGROUND;
 }
 
 int initializeServer(const char * address, int port){
@@ -93,7 +96,7 @@ int initializeServer(const char * address, int port){
 
 /* Handle finished child process (Source: https://github.com/kklis/proxy/blob/master/proxy.c;)*/
 void sigchld_handler(int signal) {
-    while (waitpid(-1, NULL, WNOHANG) > 0);
+    while (waitpid(-1, NULL, WNOHANG) > 0); //pid arg -1 is equal to any child proccess
 }
 
 /* Handle term signal */
@@ -168,7 +171,11 @@ int createServerSocket(const char * address, int port){
 }
   
 void configureServerSettings(const char * address, int port, struct sockaddr_in * serverAddr){
-	serverAddr->sin_addr.s_addr = inet_addr(address);
+	//Set the address to any if no address is given
+	serverAddr->sin_addr.s_addr = INADDR_ANY;
+	if(address != NULL)
+		serverAddr->sin_addr.s_addr = inet_addr(address);
+	
 	serverAddr->sin_family = AF_INET; //Internet address
 	serverAddr->sin_port = htons(port); //Port using htons for proper byte order
 	memset(serverAddr->sin_zero, 0, sizeof serverAddr->sin_zero); //? Set all bits of the padding field to 0 ?
