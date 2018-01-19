@@ -15,10 +15,10 @@ int getReservations(const char * command, int size, char * * response, int * res
 int insertReservation(const char * command, int size, char * * response, int * response_bytes);
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes);
 int disconnectClient();
-int getCommand(const char * * command, int * size);
+cmd getCommand(const char * * command, int * size);
 
-char getCommand(const char * * command, int * size){
-	char action;
+cmd getCommand(const char * * command, int * size){
+	cmd action;
 	if(*size < CMD_BYTES)
 		return PARSE_ERROR; 
 
@@ -29,7 +29,7 @@ char getCommand(const char * * command, int * size){
 }
 
 int parseRequest(const char * command, int size, char * * response, int * response_bytes){
-	char action;
+	cmd action;
 
 	action = getCommand(&command,&size);
 	switch(action){

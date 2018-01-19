@@ -121,6 +121,8 @@ int verifyResponseFromClient(const char * data, int bytes, int responseID){
 	return (res_code == responseID)? CLIENT_RESPONSE_OK : CLIENT_RESPONSE_ERROR;
 }
 
+
+
 int veryfyLengthResponse(const char * data, int bytes){
 	return verifyResponseFromClient(data,bytes,CLIENT_RESPONSE_LENGTH_OK);
 }
