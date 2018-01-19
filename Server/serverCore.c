@@ -1,18 +1,15 @@
 /* Server Core */
 
 #include "serverCore.h"
-#include "commandParser.h"
 #include "semaphores.h"
+#include "clientHandlerCore.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
 #include <sys/wait.h>
 
-#define _SEMAPHORE_CHILD_NAME_ "CHILD_SEMAPHORE_SRV"
-
 int createServerSocket(const char * address, int port);
-void clientHandler(int socket);
 void configureServerSettings(const char * address, int port, struct sockaddr_in * serverAddr);
 void sigchld_handler(int signal);
 void sigterm_handler(int signal);
@@ -62,7 +59,7 @@ int initializeServer(const char * address, int port){
 	//Open the childs semaphore
 	childSemaphore = openChildsSemaphore(_SEMAPHORE_CHILD_NAME_);
 
-	while(1){
+	while(TRUE){
 		acceptSocket = accept(incomingSocket, (struct sockaddr *) &clientAddr,&addr_size);
 		//Set the timeout to the socket
 		setsockopt(acceptSocket, SOL_SOCKET, SO_RCVTIMEO, (const struct timeval *)&tv,sizeof(struct timeval)); 
@@ -104,40 +101,6 @@ void sigterm_handler(int signal) {
     close(acceptSocket);
     close(incomingSocket);
     exit(SERVER_EXIT);
-}
-
-void clientHandler(int socket){
-	int read_size, write_size, response_size;
-	char read_buffer[SERVER_MAX_INPUT_LENGTH];
-	char * response_buffer;
-
-	while(1){
-		//Fill buffer with zeros
-		bzero(read_buffer,SERVER_MAX_INPUT_LENGTH); // not neccessary?
-
-		//Receive data from socket
-		read_size = recv(socket,read_buffer,SERVER_MAX_INPUT_LENGTH-1,0);
-		if(read_size == 0)
-			return; //client disconnected
-		if(read_size < 0){
-			fprintf(stderr,"Error: Reading from Socket\n");
-			return;
-		}
-
-		response_buffer = getResponse(read_buffer, read_size, &response_size);
-		if(response_buffer == NULL){
-			fprintf(stderr,"Error: Parsing request ... forcing client to disconnect \n");
-			return;
-		}
-
-		write_size = write(socket, response_buffer, response_size);
-		if(write_size < 0){
-			fprintf(stderr,"Error: Writing to Socket\n");
-			return;
-		}
-	}
-
-	return;
 }
 
 int createServerSocket(const char * address, int port){

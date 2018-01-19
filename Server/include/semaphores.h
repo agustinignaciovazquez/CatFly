@@ -7,7 +7,9 @@
 #include <sys/stat.h>        /* For mode constants */
 #include <sys/types.h>
 
+
 #define MAX_CHILD_PROCESS 77
+#define _SEMAPHORE_CHILD_NAME_ "CHILD_SEMAPHORE_SRV"
 
 sem_t * openSemaphore(const char * semaphoreKey, int val);
 sem_t * openMutexSemaphore(const char * semaphoreKey);

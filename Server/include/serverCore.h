@@ -3,11 +3,10 @@
 
 #include <sys/socket.h>
 #include <arpa/inet.h> //inet_addr
-#include <unistd.h>    //write
 #include "constants.h"
+
 #define SERVER_MAX_QUEUE_REQUEST 7
 #define SERVER_TIMEOUT 77
-#define SERVER_MAX_INPUT_LENGTH 777
 
 #define SERVER_INIT_ERROR -1
 #define SERVER_CHILD_ERROR -2

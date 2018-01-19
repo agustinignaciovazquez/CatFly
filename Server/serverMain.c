@@ -27,7 +27,7 @@ int main(int argc , char *argv[]){
 
   	status = startServer(address,port,foreground);
   	if(status == SERVER_INIT_ERROR){
-  		printf("Server could not be initiated please check address (%s) and port (%d) \n",address,port);
+  		printf("Server could not be initiated please check address (%s) and port (%d) \n",(address == NULL)? "ANYADDR":address,port);
   	}
   	
     return status;

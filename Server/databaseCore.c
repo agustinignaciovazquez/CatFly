@@ -22,18 +22,17 @@ int openDatabase(sqlite3 * * db){
 
 /*Function returns SQLITE_OK IF DB EXISTS*/
 int checkDB(sqlite3 * db){
-	char * queries[] = {DB_CHECK_QUERY, 0};
-	return openAndExecDB(db, queries);
+	return executeStaticSQL(db, DB_CHECK_QUERY);
 }
 
 /*Function returns SQLITE_OK IF IT INSTALLS DB SUCCESSFULLY*/
 int installDB(sqlite3 * db){
 	char * queries[] = {DB_CREATE_FLIGHTS_QUERY, DB_CREATE_PLANES_QUERY, DB_CREATE_RESERVATIONS_QUERY, 0};
-	return openAndExecDB(db, queries);
+	return executeStaticSQLQueries(db, queries);
 }
 
 /*Executes and array of queries */
-int openAndExecDB(sqlite3 * db, char * * sqlQueries){
+int executeStaticSQLQueries(sqlite3 * db, char * * sqlQueries){
 	int rc,i;
 
 	for(i=0; sqlQueries[i] != 0; i++){
