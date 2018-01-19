@@ -25,12 +25,13 @@ int deletePlane(const char * command, int size, char * * response, int * respons
 int getReservations(const char * command, int size, char * * response, int * response_bytes);
 int insertReservation(const char * command, int size, char * * response, int * response_bytes);
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes);
+int disconnectClient();
 
 int parseRequest(const char * command, int size, char * * response, int * response_bytes){
 	char action;
 
 	if(size == 0)
-		return PARSE_ERROR; //should never happend ... just to be safe anyway
+		return PARSE_ERROR; //should never happen ... just to be safe anyway
 	action = *command;
 	command += sizeof(char); 
 	size -= sizeof(char);
@@ -67,7 +68,7 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 			return deleteReservation(command, size, response, response_bytes);
 			break;
 		case DISCONNECT:
-			return RESPONSE_OK_AND_DISCONNECT;
+			return disconnectClient();
 			break;
 
 	}
@@ -138,8 +139,12 @@ int insertReservation(const char * command, int size, char * * response, int * r
 }
 
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes){
-	*response = SQL_DISCONNECT_CODE;
-	*response_bytes = SQL_DISCONNECT_CODE_LEN;
+	*response = DISCONNECT_CODE;
+	*response_bytes = DISCONNECT_CODE_LEN;
 	return RESPONSE_OK;
+	
+int disconnectClient(){
+	*response = DISCONNECT_CODE;
+	*response_bytes = DISCONNECT_CODE_LEN;
+	return RESPONSE_OK_AND_DISCONNECT;
 }
-

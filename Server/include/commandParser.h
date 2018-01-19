@@ -8,8 +8,8 @@
 
 #define SQL_ERROR_CODE "SQL_ERROR"
 #define SQL_ERROR_CODE_LEN 10
-#define SQL_DISCONNECT_CODE "GOODBYE"
-#define SQL_DISCONNECT_CODE_LEN 8
+#define DISCONNECT_CODE "GOODBYE"
+#define DISCONNECT_CODE_LEN 8
 
 int parseRequest(const char * command, int size, char * * response, int * response_bytes);
 
