@@ -11,9 +11,8 @@
 #define SEND_DATA_ERROR -2
 #define SEND_DATA_OK 2
 #define CLIENT_DISCONNECT 3
-
-#define CLIENT_ERROR_LENGTH 202
-#define CLIENT_OK_LENGTH 200
+#define CLIENT_RESPONSE_ERROR -4
+#define CLIENT_RESPONSE_OK 4
 
 int clientHandler(int socket);
 

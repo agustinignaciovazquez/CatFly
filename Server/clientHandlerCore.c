@@ -79,36 +79,48 @@ int sendDataAndLengthToClient(int socket, char * data, int bytes){
 	int status, read_size;
 	char buffer[SERVER_MAX_INPUT_LENGTH];
 
-	//Convert int to char *
-	char bytes_aux[sizeof(bytes)];
-	memcpy(bytes_aux, &bytes, sizeof(bytes));
+	//Create the request
+	//TODO CREATE SERIALIZE FUNCTION
+	char bytes_aux[LENGTH_TOT_BYTES];
+	char code = LENGTH_CODE; 
+	memcpy(bytes_aux, &code, CMD_BYTES);
+	memcpy(bytes_aux+RESPONSE_CODE_BYTES, &bytes, CODE_BYTES);
 	
-	status = sendDataToClient(socket, bytes_aux, sizeof(bytes));
+	status = sendDataToClient(socket, bytes_aux, RESPONSE_TOT_BYTES);
 	if(status != SEND_DATA_OK)
 		return status;
 	
-	status = getDataFromClient(socket,buffer,SERVER_MAX_INPUT_LENGTH,&read_size);
+	status = getDataFromClient(socket, buffer, SERVER_MAX_INPUT_LENGTH, &read_size);
 	if(status != RECEIVE_DATA_OK)
 		return status;
 
 	status = veryfyLengthResponse(buffer,read_size);
-	if(status != CLIENT_OK_LENGTH)
+	if(status != CLIENT_RESPONSE_OK)
 		return status;
 
 	status = sendDataToClient(socket,data,bytes);
 	return status;
 }
 
+
 int verifyResponseFromClient(const char * data, int bytes, int responseID){
-	char r;
+	int res_code;
 
-	if(bytes < sizeof(char))
-		return CLIENT_ERROR_LENGTH;
-	r = (char)*data;
+	//VERIFY BYTES MATCHES
+	if(bytes != RESPONSE_TOT_BYTES)
+		return CLIENT_RESPONSE_ERROR;
 
-	return (r == responseID)? CLIENT_OK_LENGTH : CLIENT_ERROR_LENGTH;
+	//VERIFY COMMAND MATCHES RESPONSE_CODE
+	if(*data != RESPONSE_CODE)
+		return CLIENT_RESPONSE_ERROR;
+
+	//GET RESPONSE INT TODO CREATE DESERIALIZE FUNCTION
+	data += CMD_BYTES;
+	memcpy(&res_code, data, CODE_BYTES);
+
+	return (res_code == responseID)? CLIENT_RESPONSE_OK : CLIENT_RESPONSE_ERROR;
 }
 
 int veryfyLengthResponse(const char * data, int bytes){
-	return verifyResponseFromClient(data,bytes,CLIENT_OK_LENGTH);
+	return verifyResponseFromClient(data,bytes,CLIENT_RESPONSE_LENGTH_OK);
 }

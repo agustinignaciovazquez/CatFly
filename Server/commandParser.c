@@ -1,19 +1,8 @@
 #include "commandParser.h"
+#include "constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  
-
-#define GET_FLIGHTS 'A'
-#define GET_FLIGHT_INFO 'B'
-#define INSERT_FLIGHT 'C'
-#define DELETE_FLIGHT 'D'
-#define GET_PLANES 'E'
-#define INSERT_PLANE 'F'
-#define DELETE_PLANE 'G'
-#define GET_FLIGHT_RESERVATIONS 'H'
-#define INSERT_FLIGHT_RESERVATION 'I'
-#define DELETE_FLIGHT_RESERVATION 'J'
-#define DISCONNECT 'Q'
 
 int getAllFlights(const char * command, int size, char * * response, int * response_bytes);
 int getFlightInfo(const char * command, int size, char * * response, int * response_bytes);
@@ -26,51 +15,57 @@ int getReservations(const char * command, int size, char * * response, int * res
 int insertReservation(const char * command, int size, char * * response, int * response_bytes);
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes);
 int disconnectClient();
+int getCommand(const char * * command, int * size);
+
+char getCommand(const char * * command, int * size){
+	char action;
+	if(*size < CMD_BYTES)
+		return PARSE_ERROR; 
+
+	memcpy(&action, *command, CMD_BYTES);
+	*command += CMD_BYTES; 
+	*size -= CMD_BYTES;
+	return action;
+}
 
 int parseRequest(const char * command, int size, char * * response, int * response_bytes){
 	char action;
 
-	if(size == 0)
-		return PARSE_ERROR; //should never happen ... just to be safe anyway
-	action = *command;
-	command += sizeof(char); 
-	size -= sizeof(char);
-
+	action = getCommand(&command,&size);
 	switch(action){
-		case GET_FLIGHTS:
+		case GET_FLIGHTS_CMD:
 			return getAllFlights(command, size, response, response_bytes);
 			break;
-		case GET_FLIGHT_INFO:
+		case GET_FLIGHT_INFO_CMD:
 			return getFlightInfo(command, size, response, response_bytes);
 			break;
-		case INSERT_FLIGHT:
+		case INSERT_FLIGHT_CMD:
 			return insertFlight(command, size, response, response_bytes);
 			break;
-		case DELETE_FLIGHT:
+		case DELETE_FLIGHT_CMD:
 			return deleteFlight(command, size, response, response_bytes);
 			break;
-		case GET_PLANES:
+		case GET_PLANES_CMD:
 			return getPlanes(command, size, response, response_bytes);
 			break;
-		case INSERT_PLANE:
+		case INSERT_PLANE_CMD:
 			return insertPlane(command, size, response, response_bytes);
 			break;
-		case DELETE_PLANE:
+		case DELETE_PLANE_CMD:
 			return deletePlane(command, size, response, response_bytes);
 			break;
-		case GET_FLIGHT_RESERVATIONS:
+		case GET_FLIGHT_RESERVATIONS_CMD:
 			return getReservations(command, size, response, response_bytes);
 			break;
-		case INSERT_FLIGHT_RESERVATION:
+		case INSERT_FLIGHT_RESERVATION_CMD:
 			return insertReservation(command, size, response, response_bytes);
 			break;
-		case DELETE_FLIGHT_RESERVATION:
+		case DELETE_FLIGHT_RESERVATION_CMD:
 			return deleteReservation(command, size, response, response_bytes);
 			break;
-		case DISCONNECT:
+		case DISCONNECT_CMD:
 			return disconnectClient();
 			break;
-
 	}
 
 	return PARSE_ERROR;
