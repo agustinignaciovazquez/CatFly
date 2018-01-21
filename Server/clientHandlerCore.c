@@ -12,10 +12,6 @@
 int getDataFromClient(int socket, char * buffer, int max_bytes, int * data_size);
 int sendDataToClient(int socket, char * data, int bytes);
 int sendDataAndLengthToClient(int socket, char * data, int bytes);
-int verifyResponseFromClient(const char * data, int bytes, int responseID);
-int veryfyLengthResponse(const char * data, int bytes);
-void testSerialSimpleCMD();
-void printSimpleCMD(simpleCommand * cmd);
 
 int clientHandler(int socket){
 	int con_status;
@@ -30,7 +26,7 @@ int clientHandler(int socket){
 			return con_status;
 		}
 		testSerialSimpleCMD();
-		response_status = parseRequest(read_buffer, read_size, &response_buffer, &response_size);
+		/*response_status = parseRequest(read_buffer, read_size, &response_buffer, &response_size);
 		if(response_status == PARSE_ERROR){
 			con_status = CLIENT_DISCONNECT;
 			fprintf(stderr,"Error: Parsing request ... possible hack attempt ... forcing client to disconnect \n");
@@ -42,7 +38,7 @@ int clientHandler(int socket){
 		fprintf(stderr,"status %d \n", con_status);
 		if(con_status != SEND_DATA_OK && con_status != CLIENT_RESPONSE_LENGTH_ERROR){ //keep alive if client refuses to receive the length 
 			return con_status;
-		}
+		}*/
 	}
 
 	return con_status;
@@ -101,49 +97,10 @@ int sendDataAndLengthToClient(int socket, char * data, int bytes){
 		return status;
 
 	status = veryfyLengthResponse(buffer,read_size);
-	if(status != CLIENT_RESPONSE_OK)
+	if(status != RESPONSE_OK)//Client refuses to receive
 		return status;
 
 	status = sendDataToClient(socket,data,bytes);
 	return status;
 }
 
-
-int verifyResponseFromClient(const char * data, int bytes, int responseID){
-	int r;
-	simpleCommand simpleCmd;
-
-	if(deserializeSimpleCommand(data, bytes, &simpleCmd) != DESERIALIZE_OK)
-		return CLIENT_RESPONSE_ERROR;
-
-	//VERIFY COMMAND MATCHES RESPONSE_CODE
-	if(simpleCmd.command != RESPONSE_CODE_CMD)
-		return CLIENT_RESPONSE_ERROR;
-
-	return (simpleCmd.extra == responseID)? CLIENT_RESPONSE_OK : CLIENT_RESPONSE_ERROR;
-}
-
-
-
-int veryfyLengthResponse(const char * data, int bytes){
-	return verifyResponseFromClient(data,bytes,CLIENT_RESPONSE_LENGTH_OK);
-}
-
-void testSerialSimpleCMD(){
-	char * bytes_aux;
-	int cmd_size;
-	simpleCommand n_simpleCmd;
-	simpleCommand simpleCmd = {.command = LENGTH_CODE_CMD, .extra = 777};
-
-	bytes_aux = serializeSimpleCommand(&simpleCmd, &cmd_size);
-	printf("SERIALIZATION DONE TOT SIZE:  %d\n", cmd_size);
-
-	if(deserializeSimpleCommand(bytes_aux, cmd_size, &n_simpleCmd) != DESERIALIZE_OK)
-		return;
-	printSimpleCMD(&n_simpleCmd);
-}
-
-void printSimpleCMD(simpleCommand * cmd){
-	printf("Command: %c", cmd->command);
-	printf("Extra int: %d", cmd->extra);
-}

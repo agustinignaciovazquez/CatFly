@@ -6,29 +6,17 @@
 #include <string.h>
 
 char * serializeSimpleCommand(simpleCommand * cmd, int * size){
-	char * s;
-
+	char * s, *aux;
 	s = malloc(SIMPLE_CMD_SERIALIZE_BYTES);
 	if(s == NULL)
 		return s;
-
-	memcpy(s, &(cmd->command), sizeof(cmd->command));
-	s += sizeof(cmd->command);
-	memcpy(s, &(cmd->extra), sizeof(cmd->extra));
-	s += sizeof(cmd->extra);
+	aux = s;
+	memcpy(aux, &(cmd->command), sizeof(cmd->command));
+	aux += sizeof(cmd->command);
+	memcpy(aux, &(cmd->extra), sizeof(cmd->extra));
+	aux += sizeof(cmd->extra);
 
 	*size = SIMPLE_CMD_SERIALIZE_BYTES;
 	return s;
 }
 
-int deserializeSimpleCommand(const char * data, int size, simpleCommand * cmd){
-	if(size != SIMPLE_CMD_SERIALIZE_BYTES)
-		return DESERIALIZE_ERROR;
-
-	memcpy(&(cmd->command), data, sizeof(cmd->command));
-	data += sizeof(cmd->command);
-	memcpy(&(cmd->extra), data, sizeof(cmd->extra));
-	data += sizeof(cmd->extra);
-	
-	return DESERIALIZE_OK;
-}
