@@ -14,11 +14,11 @@ int deletePlane(const char * command, int size, char * * response, int * respons
 int getReservations(const char * command, int size, char * * response, int * response_bytes);
 int insertReservation(const char * command, int size, char * * response, int * response_bytes);
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes);
-int disconnectClient();
-cmd getCommand(const char * * command, int * size);
+int disconnectClient(char * * response, int * response_bytes);
+cmd_id getCommand(const char * * command, int * size);
 
-cmd getCommand(const char * * command, int * size){
-	cmd action;
+cmd_id getCommand(const char * * command, int * size){
+	cmd_id action;
 	if(*size < CMD_BYTES)
 		return PARSE_ERROR; 
 
@@ -29,7 +29,7 @@ cmd getCommand(const char * * command, int * size){
 }
 
 int parseRequest(const char * command, int size, char * * response, int * response_bytes){
-	cmd action;
+	cmd_id action;
 
 	action = getCommand(&command,&size);
 	switch(action){
@@ -54,7 +54,7 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 		case DELETE_PLANE_CMD:
 			return deletePlane(command, size, response, response_bytes);
 			break;
-		case GET_FLIGHT_RESERVATIONS_CMD:
+		case GET_FLIGHT_RESERVATION_CMD:
 			return getReservations(command, size, response, response_bytes);
 			break;
 		case INSERT_FLIGHT_RESERVATION_CMD:
@@ -64,7 +64,7 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 			return deleteReservation(command, size, response, response_bytes);
 			break;
 		case DISCONNECT_CMD:
-			return disconnectClient();
+			return disconnectClient(response, response_bytes);
 			break;
 	}
 
@@ -137,8 +137,9 @@ int deleteReservation(const char * command, int size, char * * response, int * r
 	*response = DISCONNECT_CODE;
 	*response_bytes = DISCONNECT_CODE_LEN;
 	return RESPONSE_OK;
-	
-int disconnectClient(){
+}
+
+int disconnectClient(char * * response, int * response_bytes){
 	*response = DISCONNECT_CODE;
 	*response_bytes = DISCONNECT_CODE_LEN;
 	return RESPONSE_OK_AND_DISCONNECT;

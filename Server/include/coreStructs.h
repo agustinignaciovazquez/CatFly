@@ -1,5 +1,6 @@
 #ifndef _CORE_STRUCTS_H_
 #define _CORE_STRUCTS_H_
+#include "constants.h"
 
 typedef struct {
 	char * flightCode;
@@ -23,6 +24,11 @@ typedef struct{
 	char * passportID;
 }Reservation;
 
+typedef struct{
+	cmd_id command;
+	cmd_int extra;
+}simpleCommand;
+
 #define MAX_FLIGHTCODE 4+1
 #define MAX_ORIGIN 3+1
 #define MAX_DESTINATION MAX_ORIGIN
@@ -31,9 +37,9 @@ typedef struct{
 #define MAX_PLANE_MODEL 10+1
 #define MAX_PASSPORTID 10+1
 
-#define MAX_FLIGHT_SERIALIZE ((MAX_FLIGHTCODE+MAX_ORIGIN+MAX_DESTINATION+MAX_DEP_DATE+MAX_ARR_DATE+MAX_PLANE_MODEL)*sizeof(char))
-#define MAX_PLANE_SERIALIZE ((MAX_PLANE_MODEL)*sizeof(char)+(2*sizeof(int)))
-#define MAX_RESERVATION_SERIALIZE ((MAX_FLIGHTCODE+MAX_PASSPORTID)*sizeof(char)+(2*sizeof(int)))
-
+#define FLIGHT_SERIALIZE_BYTES ((MAX_FLIGHTCODE+MAX_ORIGIN+MAX_DESTINATION+MAX_DEP_DATE+MAX_ARR_DATE+MAX_PLANE_MODEL)*sizeof(char))
+#define PLANE_SERIALIZE_BYTES ((MAX_PLANE_MODEL)*sizeof(char)+(2*sizeof(int)))
+#define RESERVATION_SERIALIZE_BYTES ((MAX_FLIGHTCODE+MAX_PASSPORTID)*sizeof(char)+(2*sizeof(int)))
+#define SIMPLE_CMD_SERIALIZE_BYTES (sizeof(cmd_id) + sizeof(cmd_int))
 #endif
  

@@ -1,6 +1,8 @@
 #include "clientHandlerCore.h"
 #include "commandParser.h"
 #include "semaphores.h"
+#include "serializeManager.h"
+#include "coreStructs.h"
 #include "constants.h"
 #include <sys/socket.h>
 #include <stdio.h>
@@ -12,6 +14,8 @@ int sendDataToClient(int socket, char * data, int bytes);
 int sendDataAndLengthToClient(int socket, char * data, int bytes);
 int verifyResponseFromClient(const char * data, int bytes, int responseID);
 int veryfyLengthResponse(const char * data, int bytes);
+void testSerialSimpleCMD();
+void printSimpleCMD(simpleCommand * cmd);
 
 int clientHandler(int socket){
 	int con_status;
@@ -25,7 +29,7 @@ int clientHandler(int socket){
 		if(con_status != RECEIVE_DATA_OK){
 			return con_status;
 		}
-		
+		testSerialSimpleCMD();
 		response_status = parseRequest(read_buffer, read_size, &response_buffer, &response_size);
 		if(response_status == PARSE_ERROR){
 			con_status = CLIENT_DISCONNECT;
@@ -35,8 +39,8 @@ int clientHandler(int socket){
 
 		//Send data to client
 		con_status = sendDataAndLengthToClient(socket,response_buffer,response_size);
-		fprintf(stderr,"statyus %d \n", con_status);
-		if(con_status != SEND_DATA_OK && con_status != CLIENT_ERROR_LENGTH){ //keep alive if client refuses to receive the length 
+		fprintf(stderr,"status %d \n", con_status);
+		if(con_status != SEND_DATA_OK && con_status != CLIENT_RESPONSE_LENGTH_ERROR){ //keep alive if client refuses to receive the length 
 			return con_status;
 		}
 	}
@@ -76,17 +80,19 @@ int sendDataToClient(int socket, char * data, int bytes){
 
 int sendDataAndLengthToClient(int socket, char * data, int bytes){
 	//do we need mutex here?
-	int status, read_size;
+	int status, read_size, cmd_size;
 	char buffer[SERVER_MAX_INPUT_LENGTH];
+	char * bytes_aux;
 
-	//Create the request
-	//TODO CREATE SERIALIZE FUNCTION
-	char bytes_aux[LENGTH_TOT_BYTES];
-	char code = LENGTH_CODE; 
-	memcpy(bytes_aux, &code, CMD_BYTES);
-	memcpy(bytes_aux+RESPONSE_CODE_BYTES, &bytes, CODE_BYTES);
+	simpleCommand simpleCmd = {.command = LENGTH_CODE_CMD, .extra = bytes};
 	
-	status = sendDataToClient(socket, bytes_aux, RESPONSE_TOT_BYTES);
+	//Create the request
+	
+	bytes_aux = serializeSimpleCommand(&simpleCmd, &cmd_size);
+	if(bytes_aux == NULL)
+		return SEND_DATA_ERROR;
+
+	status = sendDataToClient(socket, bytes_aux, cmd_size);
 	if(status != SEND_DATA_OK)
 		return status;
 	
@@ -104,25 +110,40 @@ int sendDataAndLengthToClient(int socket, char * data, int bytes){
 
 
 int verifyResponseFromClient(const char * data, int bytes, int responseID){
-	int res_code;
+	int r;
+	simpleCommand simpleCmd;
 
-	//VERIFY BYTES MATCHES
-	if(bytes != RESPONSE_TOT_BYTES)
+	if(deserializeSimpleCommand(data, bytes, &simpleCmd) != DESERIALIZE_OK)
 		return CLIENT_RESPONSE_ERROR;
 
 	//VERIFY COMMAND MATCHES RESPONSE_CODE
-	if(*data != RESPONSE_CODE)
+	if(simpleCmd.command != RESPONSE_CODE_CMD)
 		return CLIENT_RESPONSE_ERROR;
 
-	//GET RESPONSE INT TODO CREATE DESERIALIZE FUNCTION
-	data += CMD_BYTES;
-	memcpy(&res_code, data, CODE_BYTES);
-
-	return (res_code == responseID)? CLIENT_RESPONSE_OK : CLIENT_RESPONSE_ERROR;
+	return (simpleCmd.extra == responseID)? CLIENT_RESPONSE_OK : CLIENT_RESPONSE_ERROR;
 }
 
 
 
 int veryfyLengthResponse(const char * data, int bytes){
 	return verifyResponseFromClient(data,bytes,CLIENT_RESPONSE_LENGTH_OK);
+}
+
+void testSerialSimpleCMD(){
+	char * bytes_aux;
+	int cmd_size;
+	simpleCommand n_simpleCmd;
+	simpleCommand simpleCmd = {.command = LENGTH_CODE_CMD, .extra = 777};
+
+	bytes_aux = serializeSimpleCommand(&simpleCmd, &cmd_size);
+	printf("SERIALIZATION DONE TOT SIZE:  %d\n", cmd_size);
+
+	if(deserializeSimpleCommand(bytes_aux, cmd_size, &n_simpleCmd) != DESERIALIZE_OK)
+		return;
+	printSimpleCMD(&n_simpleCmd);
+}
+
+void printSimpleCMD(simpleCommand * cmd){
+	printf("Command: %c", cmd->command);
+	printf("Extra int: %d", cmd->extra);
 }

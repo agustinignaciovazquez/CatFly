@@ -5,8 +5,9 @@
 #define FALSE 0
 
 //TYPEDEFS 
-typedef unsigned char cmd;
-typedef int code;
+typedef unsigned char cmd_id;
+typedef int cmd_int;
+
 //SERVER/CLIENT CMDS
 #define GET_FLIGHTS_CMD 'A'
 #define GET_FLIGHT_INFO_CMD 'B'
@@ -27,8 +28,8 @@ typedef int code;
 #define CLIENT_RESPONSE_LENGTH_ERROR -200 
 
 //SERVER/CLIENT BYTES
-#define CMD_BYTES sizeof(cmd)
-#define CODE_BYTES sizeof(code)
+#define CMD_BYTES sizeof(cmd_id)
+#define CODE_BYTES sizeof(cmd_int)
 #define RESPONSE_TOT_BYTES (CMD_BYTES+ CODE_BYTES)
 #define LENGTH_TOT_BYTES (CMD_BYTES+ CODE_BYTES)
 
