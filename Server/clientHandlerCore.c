@@ -25,8 +25,8 @@ int clientHandler(int socket){
 		if(con_status != RECEIVE_DATA_OK){
 			return con_status;
 		}
-		testSerialSimpleCMD();
-		/*response_status = parseRequest(read_buffer, read_size, &response_buffer, &response_size);
+		
+		response_status = parseRequest(read_buffer, read_size, &response_buffer, &response_size);
 		if(response_status == PARSE_ERROR){
 			con_status = CLIENT_DISCONNECT;
 			fprintf(stderr,"Error: Parsing request ... possible hack attempt ... forcing client to disconnect \n");
@@ -38,7 +38,7 @@ int clientHandler(int socket){
 		fprintf(stderr,"status %d \n", con_status);
 		if(con_status != SEND_DATA_OK && con_status != CLIENT_RESPONSE_LENGTH_ERROR){ //keep alive if client refuses to receive the length 
 			return con_status;
-		}*/
+		}
 	}
 
 	return con_status;
