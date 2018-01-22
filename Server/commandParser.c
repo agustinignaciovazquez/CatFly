@@ -1,9 +1,13 @@
 #include "commandParser.h"
 #include "constants.h"
 #include "serializeManager.h"
+#include "deserializeManager.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  
+
+#define DEBUG 1
+
 
 int getAllFlights(const char * command, int size, char * * response, int * response_bytes);
 int getFlightInfo(const char * command, int size, char * * response, int * response_bytes);
@@ -16,21 +20,6 @@ int getReservations(const char * command, int size, char * * response, int * res
 int insertReservation(const char * command, int size, char * * response, int * response_bytes);
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes);
 int disconnectClient(char * * response, int * response_bytes);
-cmd_id getCommand(const char * * command, int * size);
-
-int deserializeSimpleCommand(const char * data, int size, simpleCommand * cmd);
-
-
-cmd_id getCommand(const char * * command, int * size){
-	cmd_id action;
-	if(*size < sizeof(cmd_id))
-		return PARSE_ERROR; 
-
-	memcpy(&action, *command, sizeof(cmd_id));
-	*command += sizeof(cmd_id); 
-	*size -= sizeof(cmd_id);
-	return action;
-}
 
 int verifyResponseFromClient(const char * data, int bytes, int responseID){
 	int r;
@@ -39,11 +28,15 @@ int verifyResponseFromClient(const char * data, int bytes, int responseID){
 	if(deserializeSimpleCommand(data, bytes, &simpleCmd) != DESERIALIZE_OK)
 		return RESPONSE_ERROR;
 
+	#ifdef DEBUG
+		printf("Received cmd: %c extra: %d\n", simpleCmd.command,simpleCmd.extra);
+	#endif
+
 	//VERIFY COMMAND MATCHES RESPONSE_CODE
 	if(simpleCmd.command != RESPONSE_CODE_CMD)
 		return RESPONSE_ERROR;
 
-	return (simpleCmd.extra == responseID)? RESPONSE_OK : RESPONSE_ERROR;
+	return (simpleCmd.extra == responseID)? RESPONSE_OK : RESPONSE_NO;
 }
 
 int veryfyLengthResponse(const char * data, int bytes){
@@ -53,7 +46,7 @@ int veryfyLengthResponse(const char * data, int bytes){
 int parseRequest(const char * command, int size, char * * response, int * response_bytes){
 	cmd_id action;
 
-	action = getCommand(&command, &size);
+	action = deserializeCommand(&command, &size);
 	switch(action){
 		case GET_FLIGHTS_CMD:
 			return getAllFlights(command, size, response, response_bytes);
@@ -167,14 +160,3 @@ int disconnectClient(char * * response, int * response_bytes){
 	return RESPONSE_OK_AND_DISCONNECT;
 }
 
-int deserializeSimpleCommand(const char * data, int size, simpleCommand * cmd){
-	if(size != SIMPLE_CMD_SERIALIZE_BYTES)
-		return DESERIALIZE_ERROR;
-
-	memcpy(cmd, data, sizeof(cmd->command));
-	data += sizeof(cmd->command);
-	memcpy(&(cmd->extra), data, sizeof(cmd->extra));
-	data += sizeof(cmd->extra);
-	
-	return DESERIALIZE_OK;
-}

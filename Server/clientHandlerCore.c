@@ -35,8 +35,8 @@ int clientHandler(int socket){
 
 		//Send data to client
 		con_status = sendDataAndLengthToClient(socket,response_buffer,response_size);
-		fprintf(stderr,"status %d \n", con_status);
-		if(con_status != SEND_DATA_OK && con_status != CLIENT_RESPONSE_LENGTH_ERROR){ //keep alive if client refuses to receive the length 
+		
+		if(con_status != SEND_DATA_OK && con_status != RESPONSE_NO){ //keep alive if client refuses to receive the length 
 			return con_status;
 		}
 	}
@@ -89,6 +89,7 @@ int sendDataAndLengthToClient(int socket, char * data, int bytes){
 		return SEND_DATA_ERROR;
 
 	status = sendDataToClient(socket, bytes_aux, cmd_size);
+	freeSerialized(bytes_aux);
 	if(status != SEND_DATA_OK)
 		return status;
 	
@@ -101,6 +102,8 @@ int sendDataAndLengthToClient(int socket, char * data, int bytes){
 		return status;
 
 	status = sendDataToClient(socket,data,bytes);
+
+
 	return status;
 }
 

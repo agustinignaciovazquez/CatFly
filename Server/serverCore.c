@@ -2,6 +2,7 @@
 
 #include "serverCore.h"
 #include "semaphores.h"
+#include "constants.h"
 #include "clientHandlerCore.h"
 #include <stdio.h>
 #include <stdlib.h>
