@@ -1,4 +1,4 @@
-TARGET = Server
+TARGET = Server.app
 TARGET_ALL = $(TARGET)
 LIBS =  -lm -lsqlite3 -lpthread
 INCLUDE_DIRS = './include/' '../Common/include/'
