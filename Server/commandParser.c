@@ -22,7 +22,6 @@ int deleteReservation(const char * command, int size, char * * response, int * r
 int disconnectClient(char * * response, int * response_bytes);
 
 int verifyResponseFromClient(const char * data, int bytes, int responseID){
-	int r;
 	simpleCommand simpleCmd;
 
 	if(deserializeSimpleCommand(data, bytes, &simpleCmd) != DESERIALIZE_OK)

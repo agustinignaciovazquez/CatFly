@@ -15,7 +15,7 @@ int sendDataAndLengthToClient(int socket, char * data, int bytes);
 
 int clientHandler(int socket){
 	int con_status;
-	int read_size, write_size, response_size, response_status;
+	int read_size, response_size, response_status;
 	char read_buffer[SERVER_MAX_INPUT_LENGTH];
 	char * response_buffer;
 
@@ -35,7 +35,6 @@ int clientHandler(int socket){
 
 		//Send data to client
 		con_status = sendDataAndLengthToClient(socket,response_buffer,response_size);
-		
 		if(con_status != SEND_DATA_OK && con_status != RESPONSE_NO){ //keep alive if client refuses to receive the length 
 			return con_status;
 		}

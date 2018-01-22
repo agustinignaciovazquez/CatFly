@@ -58,7 +58,6 @@ int checkAndInstallDB(){
 
 int startServer(char * address, int port, int foreground){
 	int status;
-	sqlite3 * db;
 
 	if(foreground){
   		printf("Starting server in background\n");
@@ -67,5 +66,5 @@ int startServer(char * address, int port, int foreground){
   		printf("Starting server\n");
   		status = initializeServer(address,port);
   	}
-  	return status;
+  return status;
 }

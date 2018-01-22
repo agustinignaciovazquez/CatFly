@@ -16,7 +16,7 @@ int getDataAndLengthFromServer(int socket, char * * data, int * bytes);
 
 int serverHandler(int socket){
 	int con_status;
-	int read_size, send_size, length_size, response_code;
+	int read_size, send_size;
 	char * send_buffer;
 	char * read_buffer;
 
