@@ -10,7 +10,7 @@
 cmd_id deserializeCommand(const char * * command, int * size);
 
 int deserializeSimpleCommand(const char * data, int size, simpleCommand * cmd);
-
+int deserializeFlight(const char * data, int size, Flight * fl);
 
 #endif
  

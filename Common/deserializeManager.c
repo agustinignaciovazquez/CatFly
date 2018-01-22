@@ -1,5 +1,6 @@
 
 #include "deserializeManager.h"
+#include "serializeManager.h" //copybytes and copystr
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +22,13 @@ int deserializeSimpleCommand(const char * data, int size, simpleCommand * cmd){
 	cmd->command = deserializeCommand(&data, &size); //Never returns PARSE_ERROR because previous check
 	memcpy(&(cmd->extra), data, sizeof(cmd->extra));
 	data += sizeof(cmd->extra);
+	
+	return DESERIALIZE_OK;
+}
+
+int deserializeFlight(const char * data, int size, Flight * fl){
+	if(size > FLIGHT_SERIALIZE_BYTES)
+		return DESERIALIZE_ERROR;
 	
 	return DESERIALIZE_OK;
 }

@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-int copyStr(char * ser, const char * string, int max);
-int copyBytes(char * ser, const void * data, int bytes);
 int copyReservationsMinArr(char * ser, const ReservationMinimal * res, int size);
 int copyPlane(char * ser, const Plane * pl);
 int copyFlight(char * ser, const Flight * fl);
@@ -128,20 +126,20 @@ int copyReservationsMinArr(char * ser, const ReservationMinimal * res, int size)
 	return copyBytes(ser, res, sizeof(ReservationMinimal)*size); 
 }
 
-int copyStr(char * ser, const char * string,  int max){
+int copyStr(char * str, const char * data,  int max){
 	int i;
 
-	for(i = 0; i < max && string[i] != '\0';i++){
-		ser[i] = string[i];
+	for(i = 0; i < max && data[i] != '\0';i++){
+		str[i] = data[i];
 	}
-	ser[i] = '\0';
+	str[i] = '\0';
 	i++;
 
 	return i;
 }
 
-int copyBytes(char * ser, const void * data, int bytes){
-	memcpy(ser, data, bytes);
+int copyBytes(char * str, const void * data, int bytes){
+	memcpy(str, data, bytes);
 	return bytes;
 }
 
