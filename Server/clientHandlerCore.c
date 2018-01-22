@@ -97,7 +97,7 @@ int sendDataAndLengthToClient(int socket, char * data, int bytes){
 		return status;
 
 	status = veryfyLengthResponse(buffer,read_size);
-	if(status != RESPONSE_OK)//Client refuses to receive
+	if(status != RESPONSE_OK)//Client refuses to receive or parse error
 		return status;
 
 	status = sendDataToClient(socket,data,bytes);
