@@ -190,7 +190,7 @@ int copyPlanesArr(char * ser, const Plane * pl, int size){
 int copyStr(char * str, const char * data,  int max){
 	int i;
 
-	for(i = 0; i < max && data[i] != '\0';i++){
+	for(i = 0; i < max-1 && data[i] != '\0';i++){
 		str[i] = data[i];
 	}
 	str[i] = '\0';

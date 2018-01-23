@@ -142,10 +142,9 @@ void PlaneDeepCopy(Plane * dest, const Plane * pl){
 	copyStr(dest->planeModel, pl->planeModel, MAX_PLANE_MODEL);
 }
 
-Reservation * expandReservation(){
-	Reservation * res;
-
-	res = calloc(1,sizeof(Reservation));
+Reservation * expandReservation(Reservation * res){
+	if(res == NULL)
+		res = calloc(1,sizeof(Reservation));
 	if(res == NULL)
 		return NULL;
 
@@ -161,6 +160,7 @@ Reservation * expandReservation(){
 
 	return res;
 }
+
 //DEPRECATED
 ReservationMinimal * expandReservationMinimal(ReservationMinimal * res){
 	if(res == NULL)
@@ -171,7 +171,8 @@ ReservationMinimal * expandReservationMinimal(ReservationMinimal * res){
 	return res;
 }
 //------------
-flightReservations * expandFlightReservations(const char * flightCode, Plane * pl){
+
+flightReservations * expandFlightReservations(){
 	flightReservations * frs;
 
 	frs = calloc(1,sizeof(flightReservations));
@@ -183,20 +184,19 @@ flightReservations * expandFlightReservations(const char * flightCode, Plane * p
 		return NULL;
 	}
 
-	if(expandStr(&((frs->planeSeats).planeModel), MAX_PLANE_MODEL) != EXPAND_OK){
+	if((frs->planeSeats = expandPlane(0)) == NULL){
 		freeFlightReservations(frs);
 		return NULL;
 	}
 
-	setFlightReserSettings(frs,flightCode,pl);
+	frs->qReservations = 0;
+	frs->reservations = NULL;
 	return frs;
 }
 
-void setFlightReserSettings(flightReservations * frs, const char * flightCode, Plane * pl){
+void setFlightReservationsSettings(flightReservations * frs, const char * flightCode, Plane * pl){
 	copyStr(frs->flightCode, flightCode, MAX_FLIGHTCODE);
-	PlaneDeepCopy(&(frs->planeSeats), pl);
-	frs->qReservations = 0;
-	frs->reservations = NULL;
+	PlaneDeepCopy((frs->planeSeats), pl);
 }
 
 int addReservation(flightReservations * expanded, const ReservationMinimal * rs){

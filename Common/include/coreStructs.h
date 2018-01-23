@@ -41,7 +41,7 @@ typedef struct{
 
 typedef struct {
 	char * flightCode;
-	Plane planeSeats;
+	Plane * planeSeats;
 	int qReservations;
 	ReservationMinimal * reservations;
 }flightReservations;
