@@ -73,7 +73,7 @@ char * serializeFlightReservations(flightReservations * fres, int * size){
 	//Copy the struct
 	aux = s;
 	aux += copyStr(aux, fres->flightCode, MAX_FLIGHTCODE);
-	aux += copyPlane(aux, &(fres->planeSeats));
+	aux += copyPlane(aux, (fres->planeSeats));
 	aux += copyBytes(aux, (void *)&(fres->qReservations), sizeof(fres->qReservations));
 	aux += copyReservationsMinArr(aux, fres->reservations, fres->qReservations);
 

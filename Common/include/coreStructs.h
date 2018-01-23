@@ -63,7 +63,7 @@ typedef struct{
 #define PLANE_SERIALIZE_BYTES ((MAX_PLANE_MODEL)*sizeof(char)+(2*sizeof(int)))
 #define RESERVATION_SERIALIZE_BYTES ((MAX_FLIGHTCODE+MAX_PASSPORTID)*sizeof(char)+(2*sizeof(int)))
 #define RESERVATION_MINIMAL_SERIALIZE_BYTES (2*sizeof(int))
-#define FLIGHT_RESERVATION_SERIALIZE_BYTES (MAX_FLIGHTCODE*sizeof(char)+sizeof(Plane)+sizeof(int))
+#define FLIGHT_RESERVATION_SERIALIZE_BYTES (MAX_FLIGHTCODE*sizeof(char)+PLANE_SERIALIZE_BYTES+sizeof(int))
 #define FLIGHTS_SERIALIZE_BYTES (sizeof(int))
 #define PLANES_SERIALIZE_BYTES (sizeof(int))
 #define SIMPLE_CMD_SERIALIZE_BYTES (sizeof(cmd_id) + sizeof(cmd_int))
