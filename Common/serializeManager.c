@@ -199,8 +199,8 @@ int copyStr(char * str, const char * data,  int max){
 	return i;
 }
 
-int copyBytes(char * str, const void * data, int bytes){
-	memcpy(str, data, bytes);
+int copyBytes(void * dest, const void * data, int bytes){
+	memcpy(dest, data, bytes);
 	return bytes;
 }
 
