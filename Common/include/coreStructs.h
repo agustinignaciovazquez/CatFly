@@ -12,10 +12,20 @@ typedef struct {
 }Flight;
 
 typedef struct{
+	int qFlights;
+	Flight * flights;
+}Flights;
+
+typedef struct{
 	char * planeModel;
 	int rows;
 	int columns;
 }Plane;
+
+typedef struct{
+	int qPlanes;
+	Plane * planes;
+}Planes;
 
 typedef struct{
 	char * flightCode;
@@ -54,6 +64,8 @@ typedef struct{
 #define RESERVATION_SERIALIZE_BYTES ((MAX_FLIGHTCODE+MAX_PASSPORTID)*sizeof(char)+(2*sizeof(int)))
 #define RESERVATION_MINIMAL_SERIALIZE_BYTES (2*sizeof(int))
 #define FLIGHT_RESERVATION_SERIALIZE_BYTES (MAX_FLIGHTCODE*sizeof(char)+sizeof(Plane)+sizeof(int))
+#define FLIGHTS_SERIALIZE_BYTES (sizeof(int))
+#define PLANES_SERIALIZE_BYTES (sizeof(int))
 #define SIMPLE_CMD_SERIALIZE_BYTES (sizeof(cmd_id) + sizeof(cmd_int))
 #endif
  
