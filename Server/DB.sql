@@ -21,3 +21,11 @@ CREATE TABLE reservations(
 	PRIMARY KEY (flightCode,seatRow,seatColumn),
 	FOREIGN KEY (flightCode) REFERENCES flights(flightCode)
 );
+CREATE TABLE cancelations(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	flightCode TEXT NOT NULL CHECK(LENGTH("flightCode") = 4),
+	seatRow INT NOT NULL CHECK(seatRow > 0 AND seatRow < 99),
+	seatColumn INT NOT NULL CHECK(seatColumn > 0 AND seatColumn < 99),
+	passportID TEXT NOT NULL CHECK(LENGTH("passportID") >= 7 AND LENGTH("passportID") <= 10),
+	FOREIGN KEY (flightCode) REFERENCES flights(flightCode)
+);
