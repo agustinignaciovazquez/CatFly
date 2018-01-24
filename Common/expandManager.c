@@ -225,7 +225,7 @@ void ResMinDeepCopy(ReservationMinimal * dest, const ReservationMinimal * rs){
 }
 
 void freeFlightReservations(flightReservations * frs){
-	free((frs->planeSeats).planeModel);
+	freeExpandedPlane(frs->planeSeats);
 	free(frs->flightCode);
 	free(frs);
 }

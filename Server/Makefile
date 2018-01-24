@@ -25,6 +25,7 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	-rm -f *.o
+	-rm -f *.db
 	-rm -f ../Common/*.o
 	-rm -f $(TARGET)
 	

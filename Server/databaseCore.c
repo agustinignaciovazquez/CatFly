@@ -38,10 +38,10 @@ int checkAndInstallDB(){
 
 	rc = openDatabase(&db);
 	if(rc != SQLITE_OK)
-		return SERVER_DB_ERROR;
+		return rc;
 
 	//Check and install the DB if neccesary
-  	if(checkDB(db) != SQLITE_OK){
+  	if((rc = checkDB(db)) != SQLITE_OK){
   		fprintf(stdout,"Installing empty DB\n");
   		if((rc = installDB(db)) != SQLITE_OK)
   			 return rc;
