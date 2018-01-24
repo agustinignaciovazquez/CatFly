@@ -13,7 +13,7 @@ int startServer(char * address, int port, int foreground);
 int checkAndInstallDB();
 
 int main(int argc , char *argv[]){
-  	int status;
+    int status;
   	int foreground = FALSE;
   	char * address = SERVER_ADDR;
   	int port = SERVER_PORT;

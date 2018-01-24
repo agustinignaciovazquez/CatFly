@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include <string.h>  
 
-#define DEBUG 1
-
-
 int getAllFlights(const char * command, int size, char * * response, int * response_bytes);
 int getFlightInfo(const char * command, int size, char * * response, int * response_bytes);
 int insertFlight(const char * command, int size, char * * response, int * response_bytes);
@@ -24,7 +21,7 @@ int disconnectClient(char * * response, int * response_bytes);
 int verifyResponseFromClient(const char * data, int bytes, int responseID){
 	simpleCommand simpleCmd;
 
-	if(deserializeSimpleCommand(data, bytes, &simpleCmd) != DESERIALIZE_OK)
+	if(deserializeSimpleCommand(data, bytes, &simpleCmd) == DESERIALIZE_ERROR)
 		return RESPONSE_ERROR;
 
 	#ifdef DEBUG

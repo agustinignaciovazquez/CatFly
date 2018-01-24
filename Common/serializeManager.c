@@ -12,7 +12,7 @@ int copyPlane(char * ser, const Plane * pl);
 int copyFlight(char * ser, const Flight * fl);
 int copyReservation(char * ser, const Reservation * res);
 int copySimpleCmd(char * ser, const simpleCommand * cmd);
-
+int copyFlightReservations(char * ser, const flightReservations * fres);
 
 char * serializeSimpleCommand(simpleCommand * cmd, int * size){
 	char * s;
@@ -51,19 +51,17 @@ char * serializeReservation(Reservation * res, int * size){
 
 char * serializePlane(Plane * pl, int * size){
 	char * s;
-	int tot;
 	s = malloc(PLANE_SERIALIZE_BYTES);
 	if(s == NULL)
 		return s;
 	//Copy the struct
-	tot = copyPlane(s,pl);
-	*size = tot;
+	*size = copyPlane(s,pl);
 
 	return s;
 }
 
 char * serializeFlightReservations(flightReservations * fres, int * size){
-	char * s, *aux;
+	char * s;
 	int totalBytes;
 	
 	totalBytes = FLIGHT_RESERVATION_SERIALIZE_BYTES + (fres->qReservations)*RESERVATION_MINIMAL_SERIALIZE_BYTES;
@@ -71,13 +69,8 @@ char * serializeFlightReservations(flightReservations * fres, int * size){
 	if(s == NULL)
 		return s;
 	//Copy the struct
-	aux = s;
-	aux += copyStr(aux, fres->flightCode, MAX_FLIGHTCODE);
-	aux += copyPlane(aux, (fres->planeSeats));
-	aux += copyBytes(aux, (void *)&(fres->qReservations), sizeof(fres->qReservations));
-	aux += copyReservationsMinArr(aux, fres->reservations, fres->qReservations);
+	*size = copyFlightReservations(s, fres);
 
-	*size = (aux - s);
 	return s;
 }
 
@@ -185,6 +178,15 @@ int copyPlanesArr(char * ser, const Plane * pl, int size){
 	}
 
 	return (aux - ser); 
+}
+
+int copyFlightReservations(char * ser, const flightReservations * fres){
+	char * aux = ser;
+	aux += copyStr(aux, fres->flightCode, MAX_FLIGHTCODE);
+	aux += copyPlane(aux, (fres->planeSeats));
+	aux += copyBytes(aux, (void *)&(fres->qReservations), sizeof(fres->qReservations));
+	aux += copyReservationsMinArr(aux, fres->reservations, fres->qReservations);
+	return (aux - ser);
 }
 
 int copyStr(char * str, const char * data,  int max){

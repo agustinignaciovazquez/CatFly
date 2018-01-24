@@ -1,6 +1,7 @@
 
 #include "expandManager.h"
 #include "serializeManager.h" //copybytes and copystr
+#include "constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,34 +15,36 @@ void ResMinDeepCopy(ReservationMinimal * dest, const ReservationMinimal * rs);
 void setFlightReserSettings(flightReservations * frs, const char * flightCode, Plane * pl);
 
 Flight * expandFlight(Flight * fl){
-	if(fl == NULL)
+	int isArray = (fl == NULL)? FALSE : TRUE;
+
+	if(isArray == FALSE)
 		fl = malloc(sizeof(Flight));
 	if(fl == NULL)
 		return NULL;
 
 	//Expand all strings
 	if(expandStr(&(fl->flightCode), MAX_FLIGHTCODE) != EXPAND_OK){
-		freeExpandedFlight(fl);
+		freeExpandedFlight(fl, isArray);
 		return NULL;
 	}
 	if(expandStr(&(fl->origin), MAX_ORIGIN) != EXPAND_OK){
-		freeExpandedFlight(fl);
+		freeExpandedFlight(fl, isArray);
 		return NULL;
 	}
 	if(expandStr(&(fl->destination), MAX_DESTINATION) != EXPAND_OK){
-		freeExpandedFlight(fl);
+		freeExpandedFlight(fl, isArray);
 		return NULL;
 	}
 	if(expandStr(&(fl->departureDate), MAX_DEP_DATE) != EXPAND_OK){
-		freeExpandedFlight(fl);
+		freeExpandedFlight(fl, isArray);
 		return NULL;
 	}
 	if(expandStr(&(fl->arrivalDate), MAX_ARR_DATE) != EXPAND_OK){
-		freeExpandedFlight(fl);
+		freeExpandedFlight(fl, isArray);
 		return NULL;
 	}
 	if(expandStr(&(fl->planeModel), MAX_PLANE_MODEL) != EXPAND_OK){
-		freeExpandedFlight(fl);
+		freeExpandedFlight(fl, isArray);
 		return NULL;
 	}
 		
@@ -62,17 +65,20 @@ Flights * expandFlights(){
 
 int addFlight(Flights * expanded, const Flight * fl){
 	int q = expanded->qFlights;
-	Flight *aux = expanded->flights;
-
+	Flight *f,*aux = expanded->flights;
+	
 	if((q % BLOCK) == 0){
+
 		aux = realloc(expanded->flights, (q+BLOCK)*sizeof(Flight));
 		if(aux == NULL){
 			freeFlights(expanded);
 			return EXPAND_ERROR;
 		}
 		expanded->flights = aux;
+
 	}
-	if(expandFlight((expanded->flights)+q) == NULL)
+	f = (expanded->flights)+q;
+	if(expandFlight(f) == NULL)
 		return EXPAND_ERROR;
 
 	FlightDeepCopy(((expanded->flights)+q), fl);
@@ -90,14 +96,16 @@ void FlightDeepCopy(Flight * dest, const Flight * fl){
 }
 
 Plane * expandPlane(Plane * pl){
-	if(pl == NULL)
+	int isArray = (pl == NULL)? FALSE : TRUE;
+
+	if(isArray == FALSE)
 		pl = calloc(1,sizeof(Plane));
 	if(pl == NULL)
 		return NULL;
 
 	//Expand everything
 	if(expandStr(&(pl->planeModel), MAX_PLANE_MODEL) != EXPAND_OK){
-		freeExpandedPlane(pl);
+		freeExpandedPlane(pl, isArray);
 		return NULL;
 	}
 
@@ -143,18 +151,20 @@ void PlaneDeepCopy(Plane * dest, const Plane * pl){
 }
 
 Reservation * expandReservation(Reservation * res){
-	if(res == NULL)
+	int isArray = (res == NULL)? FALSE:TRUE;
+
+	if(isArray == FALSE)
 		res = calloc(1,sizeof(Reservation));
 	if(res == NULL)
 		return NULL;
 
 	//Expand everything
 	if(expandStr(&(res->flightCode), MAX_FLIGHTCODE) != EXPAND_OK){
-		freeExpandedReservation(res);
+		freeExpandedReservation(res, isArray);
 		return NULL;
 	}
 	if(expandStr(&(res->passportID), MAX_PASSPORTID) != EXPAND_OK){
-		freeExpandedReservation(res);
+		freeExpandedReservation(res, isArray);
 		return NULL;
 	}
 
@@ -170,6 +180,11 @@ ReservationMinimal * expandReservationMinimal(ReservationMinimal * res){
 
 	return res;
 }
+
+void freeExpandedReservationMin(Reservation * res){
+	free(res);
+}
+
 //------------
 
 flightReservations * expandFlightReservations(){
@@ -212,7 +227,7 @@ int addReservation(flightReservations * expanded, const ReservationMinimal * rs)
 		expanded->reservations = aux;
 	}
 	/*if(expandReservationMinimal((expanded->reservations)+q) == NULL)
-		return EXPAND_ERROR;*/
+		return EXPAND_ERROR;*/ //no se necesita
 
 	ResMinDeepCopy(((expanded->reservations)+q), rs);
 	expanded->qReservations += 1;
@@ -225,56 +240,90 @@ void ResMinDeepCopy(ReservationMinimal * dest, const ReservationMinimal * rs){
 }
 
 void freeFlightReservations(flightReservations * frs){
-	freeExpandedPlane(frs->planeSeats);
+	#ifdef DEBUG
+		fprintf(stdout, "Free FLIGHTCODE STR in (%p)\n", frs->flightCode);
+		fprintf(stdout, "Free array reservations in (%p)\n", frs->reservations);
+		fprintf(stdout, "Free struct in (%p)\n", frs);
+	#endif
+	freeExpandedPlane(frs->planeSeats, FALSE);
 	free(frs->flightCode);
+	free(frs->reservations);
 	free(frs);
 }
 
 void freeFlights(Flights * fls){
-	int i;
+	int i,q;
 	Flight * f;
-	for(i = 0; i < fls->qFlights;i++){
-		f = fls->flights+i;
-		freeExpandedFlight(f);
+	q = fls->qFlights;
+	#ifdef DEBUG
+		fprintf(stdout, "Free array flights in (%p)\n", fls->flights);
+		fprintf(stdout, "Free struct in (%p)\n", fls);
+	#endif
+	for(i = 0; i < q;i++){
+		f = (fls->flights)+i;
+		freeExpandedFlight(f, TRUE);
 	}
 	free(fls->flights);
 	free(fls);
 }
 
 void freePlanes(Planes * pls){
-	int i;
+	int i,q;
 	Plane * p;
-	for(i = 0; i < pls->qPlanes;i++){
-		p = pls->planes+i;
-		freeExpandedPlane(p);
+	q = pls->qPlanes;
+	#ifdef DEBUG
+		fprintf(stdout, "Free array planes in (%p)\n", pls->planes);
+		fprintf(stdout, "Free struct in (%p)\n", pls);
+	#endif
+	for(i = 0; i < q;i++){
+		p = (pls->planes)+i;
+		freeExpandedPlane(p, TRUE);
 	}
 	free(pls->planes);
 	free(pls);
 }
 
-void freeExpandedReservation(Reservation * res){
+void freeExpandedReservation(Reservation * res, int isArray){
+	#ifdef DEBUG
+		fprintf(stdout, "Free FLIGHTCODE STR in (%p)\n", res->flightCode);
+		fprintf(stdout, "Free PASSPORTID STR in (%p)\n", res->passportID);
+		if(isArray == FALSE)
+			fprintf(stdout, "Free struct in (%p)\n", res);
+	#endif
 	free(res->flightCode);
 	free(res->passportID);
-	free(res);
+	if(isArray == FALSE)
+		free(res);
 }
 
-void freeExpandedReservationMin(Reservation * res){
-	free(res);
-}
-
-void freeExpandedPlane(Plane * pl){
+void freeExpandedPlane(Plane * pl, int isArray){
+	#ifdef DEBUG
+	fprintf(stdout, "Free PLANE_MODEL STR in (%p)\n", pl->planeModel);
+	#endif
 	free(pl->planeModel);
-	free(pl);
+	if(isArray == FALSE)
+		free(pl);
 }
 
-void freeExpandedFlight(Flight * fl){
+void freeExpandedFlight(Flight * fl, int isArray){
+	#ifdef DEBUG
+		fprintf(stdout, "Free FLCODE STR in (%p)\n", fl->flightCode);
+		fprintf(stdout, "Free ORIGIN STR in (%p)\n", fl->origin);
+		fprintf(stdout, "Free DEST STR in (%p)\n", fl->destination);
+		fprintf(stdout, "Free DEPDATE STR in (%p)\n", fl->departureDate);
+		fprintf(stdout, "Free ARRDATE STR in (%p)\n", fl->arrivalDate);
+		fprintf(stdout, "Free PLANE_MODEL STR in (%p)\n", fl->planeModel);
+		if(isArray == FALSE)
+			fprintf(stdout, "Free struct in (%p)\n", fl);
+	#endif
 	free(fl->flightCode);
 	free(fl->origin);
 	free(fl->destination);
 	free(fl->departureDate);
 	free(fl->arrivalDate);
 	free(fl->planeModel);
-	free(fl);
+	if(isArray == FALSE)
+		free(fl);
 }
 
 int expandStr(char * * p, int max){

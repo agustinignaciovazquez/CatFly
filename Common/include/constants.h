@@ -4,6 +4,8 @@
 #define TRUE 1
 #define FALSE 0
 
+#define DEBUG //COMMENT THIS IN FINAL REV
+
 //TYPEDEFS 
 typedef unsigned char cmd_id;
 typedef int cmd_int;

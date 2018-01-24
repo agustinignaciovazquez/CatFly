@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG 1
-
 int getDataFromServer(int socket, char * buffer, int max_bytes, int * data_size);
 int sendDataToServer(int socket, char * data, int bytes);
 int getDataAndLengthFromServer(int socket, char * * data, int * bytes);
@@ -85,7 +83,7 @@ int getDataAndLengthFromServer(int socket, char * * data, int * bytes){
 	if(status != RECEIVE_DATA_OK)
 		return status;
 
-	if(deserializeSimpleCommand(buffer, read_size, &simpleCmd) != DESERIALIZE_OK)
+	if(deserializeSimpleCommand(buffer, read_size, &simpleCmd) == DESERIALIZE_ERROR)
 		return RECEIVE_DATA_ERROR;
 	
 	//VERIFY RESPONSE MATCHES LENGTH COMMAND
