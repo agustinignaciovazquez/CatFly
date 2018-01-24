@@ -47,7 +47,7 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 		case GET_FLIGHTS_CMD:
 			return getAllFlights(command, size, response, response_bytes);
 			break;
-		case GET_FLIGHT_INFO_CMD:
+		case GET_FLIGHT_CANCELATIONS_CMD:
 			return getFlightInfo(command, size, response, response_bytes);
 			break;
 		case INSERT_FLIGHT_CMD:

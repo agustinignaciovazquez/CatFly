@@ -13,6 +13,7 @@ ReservationMinimal * expandReservationMinimal(ReservationMinimal * res);
 Flights * expandFlights();
 Planes * expandPlanes();
 flightReservations * expandFlightReservations();
+simpleMessage * expandSimpleMessage();
 int addReservation(flightReservations * expanded, const ReservationMinimal * rs);
 int addFlight(Flights * expanded, const Flight * fl);
 int addPlane(Planes * expanded, const Plane * pl);
@@ -22,6 +23,8 @@ void freeExpandedReservation(Reservation * res, int isArray);
 void freeFlights(Flights * fls);
 void freePlanes(Planes * pls);
 void freeFlightReservations(flightReservations * frs);
-void setFlightReservationsSettings(flightReservations * frs, const char * flightCode, Plane * pl);
+void freeExpandedSimpleMessage(simpleMessage * sMgs);
+void setFlightReservationsSettings(flightReservations * frs, const char * flightCode, const Plane * pl);
+void setSimpleMessageSettings(simpleMessage * sMsgs, cmd_id cmd,const char * msg);
 #endif
  

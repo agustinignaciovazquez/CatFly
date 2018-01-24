@@ -33,7 +33,10 @@ int serverHandler(int socket){
 		if(con_status != RECEIVE_DATA_OK && con_status != RESERVE_MEM_ERROR){ //keep alive if reserve mem fails
 			return con_status;
 		}
-		
+		if(con_status == RECEIVE_DATA_OK){
+			printf("%s \n", read_buffer);
+			free(read_buffer);
+		}
 	}
 
 	return con_status;
@@ -97,7 +100,7 @@ int getDataAndLengthFromServer(int socket, char * * data, int * bytes){
 	//Reserve memory for server response 
 	read_size = simpleCmd.extra;
 	bytes_aux = malloc(read_size);
-	bytes_aux = NULL;
+	
 	if(bytes_aux == NULL){
 		rCmd.extra = CLIENT_RESPONSE_LENGTH_ERROR;
 		status = RESERVE_MEM_ERROR;

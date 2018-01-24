@@ -13,6 +13,7 @@ int copyFlight(char * ser, const Flight * fl);
 int copyReservation(char * ser, const Reservation * res);
 int copySimpleCmd(char * ser, const simpleCommand * cmd);
 int copyFlightReservations(char * ser, const flightReservations * fres);
+int copySimpleMsg(char * ser, const simpleMessage * mgs);
 
 char * serializeSimpleCommand(simpleCommand * cmd, int * size){
 	char * s;
@@ -22,6 +23,17 @@ char * serializeSimpleCommand(simpleCommand * cmd, int * size){
 	//Copy the struct
 	*size = copySimpleCmd(s,cmd);
 
+	return s;
+}
+
+char * serializeSimpleMessage(simpleMessage * smgs, int * size){
+	char * s;
+	s = malloc(SIMPLE_MSG_SERIALIZE_BYTES);
+	if(s == NULL)
+		return s;	
+
+	//Copy the struct
+	*size = copySimpleMsg(s,smgs);
 	return s;
 }
 
@@ -115,6 +127,15 @@ int copySimpleCmd(char * ser, const simpleCommand * cmd){
 
 	aux += copyBytes(aux, (void *) &(cmd->command), sizeof(cmd->command));
 	aux += copyBytes(aux, (void *) &(cmd->extra), sizeof(cmd->extra));
+
+	return (aux - ser);
+}
+
+int copySimpleMsg(char * ser, const simpleMessage * sm){
+	char * aux = ser;
+
+	aux += copyBytes(aux, (void *) &(sm->command), sizeof(sm->command));
+	aux += copyStr(aux, sm->msg, MAX_MESSAGE_LENGTH);
 
 	return (aux - ser);
 }

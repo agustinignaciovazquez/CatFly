@@ -6,7 +6,7 @@
 #define F_DESTINATION_COLUMN 2
 #define F_DEPARTURE_DATE_COLUMN 3
 #define F_ARRIVALDATE_DATE_COLUMN 4
-#define F_PLANE_MODEL_COLUMN5
+#define F_PLANE_MODEL_COLUMN 5
 
 #define P_MODEL_COLUMN 0
 #define P_ROWS_COLUMN 1
@@ -43,8 +43,8 @@ columns INT NOT NULL CHECK(columns > 0 AND columns < 99));"
 
 #define DB_CREATE_RESERVATIONS_QUERY "CREATE TABLE reservations(\
 flightCode TEXT NOT NULL CHECK(LENGTH(\"flightCode\") = 4),\
-seatRow INT NOT NULL CHECK(seatRow > 0 AND seatRow < 99),\
-seatColumn INT NOT NULL CHECK(seatColumn > 0 AND seatColumn < 99),\
+seatRow INT NOT NULL CHECK(seatRow >= 0 AND seatRow < 99),\
+seatColumn INT NOT NULL CHECK(seatColumn >= 0 AND seatColumn < 99),\
 passportID TEXT NOT NULL CHECK(LENGTH(\"passportID\") >= 7 AND LENGTH(\"passportID\") <= 10),\
 PRIMARY KEY (flightCode,seatRow,seatColumn),\
 FOREIGN KEY (flightCode) REFERENCES flights(flightCode));"
@@ -52,19 +52,19 @@ FOREIGN KEY (flightCode) REFERENCES flights(flightCode));"
 #define DB_CREATE_CANCELATIONS_QUERY "CREATE TABLE cancelations(\
 id INTEGER PRIMARY KEY AUTOINCREMENT,\
 flightCode TEXT NOT NULL CHECK(LENGTH(\"flightCode\") = 4),\
-seatRow INT NOT NULL CHECK(seatRow > 0 AND seatRow < 99),\
-seatColumn INT NOT NULL CHECK(seatColumn > 0 AND seatColumn < 99),\
+seatRow INT NOT NULL CHECK(seatRow >= 0 AND seatRow < 99),\
+seatColumn INT NOT NULL CHECK(seatColumn >= 0 AND seatColumn < 99),\
 passportID TEXT NOT NULL CHECK(LENGTH(\"passportID\") >= 7 AND LENGTH(\"passportID\") <= 10),\
 FOREIGN KEY (flightCode) REFERENCES flights(flightCode));"
 
 #define DB_INSERT_FLIGHT_QUERY "INSERT INTO flights VALUES(?,?,?,?,?,?);"
 #define DB_INSERT_PLANE_QUERY "INSERT INTO planes VALUES(?,?,?);"
 #define DB_INSERT_RESERVATION_QUERY "INSERT INTO reservations VALUES(?,?,?,?);"
-#define DB_INSERT_CANCELATION_QUERY "INSERT INTO cancelations VALUES(NULL,?,?,?,?);"
+#define DB_INSERT_CANCELATION_QUERY "INSERT INTO cancelations SELECT NULL,* FROM reservations WHERE flightCode = ? AND seatRow = ? AND seatColumn = ?;"
 
 #define DB_DELETE_FLIGHT_QUERY "DELETE FROM flights WHERE flightCode = ?;"
 #define DB_DELETE_PLANE_QUERY "DELETE FROM planes WHERE model = ?;"
-#define DB_DELETE_RESERVATION_QUERY "DELETE FROM reservation WHERE flightCode = ? AND passportID = ?;"
+#define DB_DELETE_RESERVATION_QUERY "DELETE FROM reservation WHERE flightCode = ? AND seatRow = ? AND seatColumn = ?;"
 
 #define DB_GET_FLIGHTS_QUERY "SELECT * FROM flights;"
 #define DB_GET_FLIGHT_QUERY "SELECT * FROM flights WHERE flightCode = ?;"

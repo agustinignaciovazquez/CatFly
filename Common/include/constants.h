@@ -12,7 +12,7 @@ typedef int cmd_int;
 
 //SERVER/CLIENT CMDS
 #define GET_FLIGHTS_CMD 'A'
-#define GET_FLIGHT_INFO_CMD 'B'
+#define GET_FLIGHT_CANCELATIONS_CMD 'B'
 #define INSERT_FLIGHT_CMD 'C'
 #define DELETE_FLIGHT_CMD 'D'
 #define GET_PLANES_CMD 'E'

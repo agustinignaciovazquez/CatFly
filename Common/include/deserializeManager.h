@@ -15,6 +15,6 @@ int deserializePlanes(const char * data, int size, Planes * pls);
 int deserializeReservation(const char * data, int size, Reservation * res);
 int deserializeReservationMin(const char * data, int size, ReservationMinimal * res);
 int deserializeFlightReservations(const char * data, int size, flightReservations * res);
-
+int deserializeSimpleMessage(const char * data, int size, simpleMessage * sm);
 #endif
  

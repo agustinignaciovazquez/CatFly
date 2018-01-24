@@ -14,6 +14,26 @@ void PlaneDeepCopy(Plane * dest, const Plane * pl);
 void ResMinDeepCopy(ReservationMinimal * dest, const ReservationMinimal * rs);
 void setFlightReserSettings(flightReservations * frs, const char * flightCode, Plane * pl);
 
+simpleMessage * expandSimpleMessage(){
+	simpleMessage * sMgs;
+
+	sMgs = calloc(1, sizeof(simpleMessage));
+	if(sMgs == NULL)
+		return NULL;
+
+	if(expandStr(&(sMgs->msg), MAX_MESSAGE_LENGTH) != EXPAND_OK){
+		freeExpandedSimpleMessage(sMgs);
+		return NULL;
+	}
+
+	return sMgs;
+}
+
+void setSimpleMessageSettings(simpleMessage * sMsgs, cmd_id cmd,const char * msg){
+	copyStr(sMsgs->msg, msg, MAX_MESSAGE_LENGTH);
+	sMsgs->command = cmd;
+}
+
 Flight * expandFlight(Flight * fl){
 	int isArray = (fl == NULL)? FALSE : TRUE;
 
@@ -209,7 +229,7 @@ flightReservations * expandFlightReservations(){
 	return frs;
 }
 
-void setFlightReservationsSettings(flightReservations * frs, const char * flightCode, Plane * pl){
+void setFlightReservationsSettings(flightReservations * frs, const char * flightCode, const Plane * pl){
 	copyStr(frs->flightCode, flightCode, MAX_FLIGHTCODE);
 	PlaneDeepCopy((frs->planeSeats), pl);
 }
@@ -237,6 +257,15 @@ int addReservation(flightReservations * expanded, const ReservationMinimal * rs)
 void ResMinDeepCopy(ReservationMinimal * dest, const ReservationMinimal * rs){
 	dest->seatRow = rs->seatRow;
 	dest->seatColumn = rs->seatColumn;
+}
+
+void freeExpandedSimpleMessage(simpleMessage * sMgs){
+	#ifdef DEBUG
+		fprintf(stdout, "Free msg STR in (%p)\n", sMgs->msg);
+		fprintf(stdout, "Free struct in (%p)\n", sMgs);
+	#endif
+	free(sMgs->msg);
+	free(sMgs);
 }
 
 void freeFlightReservations(flightReservations * frs){

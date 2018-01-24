@@ -11,6 +11,8 @@ void testSerialRes();
 void testSerialFlightRes();
 void printFlightReservations(flightReservations * fres);
 void printReservationMin(ReservationMinimal * resM, int size);
+void printSimpleMsg(simpleMessage * fd);
+void testSerialSimpleMsg();
 
 void testSerialSimpleCMD(){
 	char * bytes_aux;
@@ -33,6 +35,34 @@ void printSimpleCMD(simpleCommand * cmd){
 	fprintf(stdout,"struct in : %p\nCommand: %c (at %p)\n", cmd, cmd->command, &(cmd->command));
 	fprintf(stdout,"Extra int: %d (at %p)\n", cmd->extra, &(cmd->extra));
 } 
+
+void testSerialSimpleMsg(){
+  char * bytes_aux;
+  int bytes_size;
+
+  simpleMessage * fd = expandSimpleMessage();
+  simpleMessage * fd2 = expandSimpleMessage();
+  setSimpleMessageSettings(fd, 'A', "TEST DES SER OK ?? :)(:");
+
+  bytes_aux = serializeSimpleMessage(fd, &bytes_size);
+  printf("SERIALIZE DONE TOT SIZE:  %d\n ORIGINAL: \n", bytes_size);
+  printSimpleMsg(fd);
+
+  if(deserializeSimpleMessage(bytes_aux, bytes_size, fd2) == DESERIALIZE_ERROR){
+    printf("ERROR DESERIALIZE");
+    return;
+  }
+
+  printf("DESERIALIZED: %d\n", bytes_size);
+  printSimpleMsg(fd2);
+  freeExpandedSimpleMessage(fd);
+  freeExpandedSimpleMessage(fd2);
+}
+
+void printSimpleMsg(simpleMessage * fd){
+  fprintf(stdout,"struct in : %p\nCommand: %c (at %p)\n", fd, fd->command, &(fd->command));
+  fprintf(stdout,"Message: %s (at %p)\n", fd->msg, (fd->msg));
+}
 
 void testSerialFlight(){
   char * bytes_aux;

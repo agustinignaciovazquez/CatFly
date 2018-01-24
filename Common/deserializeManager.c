@@ -29,6 +29,21 @@ int deserializeSimpleCommand(const char * data, int size, simpleCommand * cmd){
 	return (aux - data);
 }
 
+int deserializeSimpleMessage(const char * data, int size, simpleMessage * sm){
+	const char * aux;
+	if(sm == NULL)
+		return DESERIALIZE_ERROR;
+
+	aux = data;
+	//function assumes the sm struct is expanded
+	aux += copyBytes(&(sm->command), (void *) aux, sizeof(sm->command));
+	aux += copyStr(sm->msg, aux, MAX_MESSAGE_LENGTH);
+
+	if(size < (aux - data))
+		return DESERIALIZE_ERROR;
+	return (aux - data);
+}
+
 int deserializeFlight(const char * data, int size, Flight * fl){
 	const char * aux;
 	if(fl == NULL)
