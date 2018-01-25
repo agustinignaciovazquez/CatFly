@@ -89,6 +89,7 @@ int initializeServer(const char * address, int port){
 			}
 		}
 	}
+	sem_close(childSemaphore);
 	return SERVER_EXIT;
 }
 

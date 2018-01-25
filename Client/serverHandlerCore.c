@@ -47,7 +47,7 @@ int getDataFromServer(int socket, char * buffer, int max_bytes, int * data_size)
 
 	read_size = recv(socket,buffer,max_bytes,0);
 	if(read_size == 0)
-		return SERVER_DISCONNECTED; //client disconnected
+		return SERVER_DISCONNECTED; //server disconnected
 	if(read_size < 0){
 		fprintf(stderr,"Error: Reading from Socket ... Possible Timeout\n");
 		return RECEIVE_DATA_ERROR;
@@ -59,14 +59,15 @@ int getDataFromServer(int socket, char * buffer, int max_bytes, int * data_size)
 }
 
 int sendDataToServer(int socket, char * data, int bytes){
-	int write_size = 0;
+	int writed, write_size = 0;
 
 	do{
-		write_size = write(socket, data, bytes);
-		if(write_size <= 0){
+		writed = write(socket, (data + write_size), bytes);
+		if(writed <= 0){
 			fprintf(stderr,"Error: Writing to Socket\n");
 			return SEND_DATA_ERROR;
 		}
+		write_size += writed;
 	}while(write_size < bytes); //write return value may at times be less than the specified nbytes (returns the number of bytes successfully)
 
 	return SEND_DATA_OK;

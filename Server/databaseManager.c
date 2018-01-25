@@ -2,19 +2,22 @@
 #include "databaseCore.h"
 #include "databaseConstants.h"
 #include "expandManager.h"
+#include "semaphores.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+int insertReservation_DB(Reservation * r, sqlite3 * db);
+int deleteReservation_DB(Reservation * r, sqlite3 * db);
 void setFlightData(Flight * f, sqlite3_stmt * stmt);
 void bindFlightInsertData(Flight * f, sqlite3_stmt * stmt);
 void bindFlightDeleteData(const char * fCode, sqlite3_stmt * stmt);
-void bindPlaneInsertData(Plane * p, sqlite3_stmt * stmt);
 void setPlaneData(Plane * p, sqlite3_stmt * stmt);
+void bindPlaneInsertData(Plane * p, sqlite3_stmt * stmt);
+void bindPlaneDeleteData(const char * planeModel, sqlite3_stmt * stmt);
 void bindFlightDeleteData(const char * planeModel, sqlite3_stmt * stmt);
 void bindReservationInsertData(const Reservation * r, sqlite3_stmt * stmt);
 void bindReservationDeleteData(const Reservation * r, sqlite3_stmt * stmt);
-
 /*
 sqlite3_bind_text(stmt, 1, "Susan", -1, SQLITE_STATIC);                                        
 	sqlite3_bind_int(stmt, 2, 21);  
@@ -26,28 +29,40 @@ sqlite3_bind_text(stmt, 1, "Susan", -1, SQLITE_STATIC);
       return rc;*/
 Flights * getFlights_DB(sqlite3 * db){
 	int rc;
+	sem_t * sem;
 	sqlite3_stmt * stmt;
 	Flights * flights;
    	Flight f;
+	
+   	flights = expandFlights();
+	if(flights == NULL){
+		return NULL;
+	}
 
+ 	sem = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_);
+	sem_wait(sem);
 	rc = sqlite3_prepare_v2(db, DB_GET_FLIGHTS_QUERY, -1, &stmt, 0);
-	if(rc != SQLITE_OK)
+	if(rc != SQLITE_OK){
+		sem_post(sem);
+		sem_close(sem);
 		return NULL;
+	}
 
-	flights = expandFlights();
-	if(flights == NULL)
-		return NULL;
-  	
 	while((rc = sqlite3_step(stmt)) == SQLITE_ROW){
 		setFlightData(&f,stmt);
 		if(addFlight(flights,&f) != EXPAND_OK){
 			freeFlights(flights);
+			sem_post(sem);
+			sem_close(sem);
 			return NULL;
 		}
 	}	
 
-      
 	rc = sqlite3_finalize(stmt);
+
+	sem_post(sem);
+	sem_close(sem);
+
 	if(rc != SQLITE_OK){
 		freeFlights(flights);
 		return NULL;
@@ -67,16 +82,22 @@ void setFlightData(Flight * f, sqlite3_stmt * stmt){
 
 simpleMessage * insertFlight_DB(Flight * f, sqlite3 * db){
 	int rc;
+	sem_t * sem;
 	sqlite3_stmt * stmt;
 	simpleMessage * smsg;
 
 	smsg = expandSimpleMessage();
 	if(smsg == NULL)
 		return NULL;
-	
+
+	sem = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_);
+	sem_wait(sem);
+
 	rc = sqlite3_prepare_v2(db, DB_INSERT_FLIGHT_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
+		sem_post(sem);
+		sem_close(sem);
 		return smsg;
 	}
 	
@@ -85,17 +106,23 @@ simpleMessage * insertFlight_DB(Flight * f, sqlite3 * db){
 	rc = sqlite3_step(stmt); 
 	if (rc != SQLITE_DONE) {
 	    setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
+	    sem_post(sem);
+		sem_close(sem);
 	    return smsg;
 	}
 
       
 	rc = sqlite3_finalize(stmt);
+	
+	sem_post(sem);
+	sem_close(sem);
+
 	if(rc != SQLITE_OK){
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 		return smsg;
 	}
 
-	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SUCCESS_INSERT_FLIGHT_STR);
+	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_FLIGHT_OK);
 	return smsg;
 }
 
@@ -138,7 +165,7 @@ simpleMessage * deleteFlight_DB(const char * flightCode, sqlite3 * db){
 		return smsg;
 	}
 
-	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SUCCESS_INSERT_FLIGHT_STR);
+	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SERVER_RESPONSE_DELETE_FLIGHT_OK);
 	return smsg;
 }
 
@@ -146,7 +173,7 @@ void bindFlightDeleteData(const char * fCode, sqlite3_stmt * stmt){
 	sqlite3_bind_text(stmt, 1, fCode, -1, SQLITE_STATIC); 
 }
 
-Planes * getPlanes(sqlite3 * db){
+Planes * getPlanes_DB(sqlite3 * db){
 	int rc;
 	sqlite3_stmt * stmt;
 	Planes * planes;
@@ -175,7 +202,7 @@ Planes * getPlanes(sqlite3 * db){
 		return NULL;
 	}
 
-	return flights;
+	return planes;
 }
 
 void setPlaneData(Plane * p, sqlite3_stmt * stmt){
@@ -214,7 +241,7 @@ simpleMessage * insertPlane_DB(Plane * p, sqlite3 * db){
 		return smsg;
 	}
 
-	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SUCCESS_INSERT_FLIGHT_STR);
+	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_PLANE_OK);
 	return smsg;
 }
 
@@ -240,7 +267,7 @@ simpleMessage * deletePlane_DB(const char * planeModel, sqlite3 * db){
 	}
 	
 	
-  	bindFlightDeleteData(planeModel, stmt);
+  	bindPlaneDeleteData(planeModel, stmt);
 	rc = sqlite3_step(stmt); 
 	if (rc != SQLITE_DONE) {
 	    setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
@@ -254,46 +281,31 @@ simpleMessage * deletePlane_DB(const char * planeModel, sqlite3 * db){
 		return smsg;
 	}
 
-	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SUCCESS_INSERT_FLIGHT_STR);
+	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SERVER_RESPONSE_DELETE_PLANE_OK);
 	return smsg;
 }
 
-void bindFlightDeleteData(const char * planeModel, sqlite3_stmt * stmt){
+void bindPlaneDeleteData(const char * planeModel, sqlite3_stmt * stmt){
 	sqlite3_bind_text(stmt, 1, planeModel, -1, SQLITE_STATIC); 
 }
 
-simpleMessage * insertReservation_DB(Reservation * r, sqlite3 * db){
+int insertReservation_DB(Reservation * r, sqlite3 * db){
 	int rc;
 	sqlite3_stmt * stmt;
-	simpleMessage * smsg;
-
-	smsg = expandSimpleMessage();
-	if(smsg == NULL)
-		return NULL;
 	
 	rc = sqlite3_prepare_v2(db, DB_INSERT_RESERVATION_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
-		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
-		return smsg;
+		return rc;
 	}
 	
 	
   	bindReservationInsertData(r,stmt);
 	rc = sqlite3_step(stmt); 
 	if (rc != SQLITE_DONE) {
-	    setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
-	    return smsg;
+	    return rc;
 	}
 
-      
-	rc = sqlite3_finalize(stmt);
-	if(rc != SQLITE_OK){
-		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
-		return smsg;
-	}
-
-	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SUCCESS_INSERT_FLIGHT_STR);
-	return smsg;
+	return sqlite3_finalize(stmt);
 }
 
 void bindReservationInsertData(const Reservation * r, sqlite3_stmt * stmt){
@@ -303,37 +315,21 @@ void bindReservationInsertData(const Reservation * r, sqlite3_stmt * stmt){
 	sqlite3_bind_text(stmt, R_PASSPORTID_COLUMN+1, r->passportID, -1, SQLITE_STATIC); 
 }
 
-simpleMessage * deleteReservation_DB(Reservation * r, sqlite3 * db){
+int deleteReservation_DB(Reservation * r, sqlite3 * db){
 	int rc;
 	sqlite3_stmt * stmt;
-	simpleMessage * smsg;
-	//TODO ADD SECURITY CHECK PASSPORT ID WITH SEMAPHORES
-	smsg = expandSimpleMessage();
-	if(smsg == NULL)
-		return NULL;
 	
 	rc = sqlite3_prepare_v2(db, DB_DELETE_RESERVATION_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
-		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
-		return smsg;
+		return rc;
 	}
 	
-  	bindReservationDeleteData(planeModel, stmt);
+  	bindReservationDeleteData(r, stmt);
 	rc = sqlite3_step(stmt); 
 	if (rc != SQLITE_DONE) {
-	    setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
-	    return smsg;
+	    return rc;
 	}
-
-      
-	rc = sqlite3_finalize(stmt);
-	if(rc != SQLITE_OK){
-		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
-		return smsg;
-	}
-
-	setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SUCCESS_INSERT_FLIGHT_STR);
-	return smsg;
+	return sqlite3_finalize(stmt);
 }
 
 void bindReservationDeleteData(const Reservation * r, sqlite3_stmt * stmt){

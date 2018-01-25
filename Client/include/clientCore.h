@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h> //inet_addr
 
-#define SERVER_CONNECTION_ERROR -1
+#define SERVER_CONNECTION_ERROR -7
 
 /* using http://www.binarytides.com/server-client-example-c-sockets-linux/ part of code */
 int connectToServer(const char * address, int port);

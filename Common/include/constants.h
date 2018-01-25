@@ -4,7 +4,7 @@
 #define TRUE 1
 #define FALSE 0
 
-#define DEBUG //COMMENT THIS IN FINAL REV
+//#define DEBUG //COMMENT THIS IN FINAL REV
 
 //TYPEDEFS 
 typedef unsigned char cmd_id;
@@ -29,6 +29,10 @@ typedef int cmd_int;
 //SERVER/CLIENT CODES
 #define CLIENT_RESPONSE_LENGTH_OK 200
 #define CLIENT_RESPONSE_LENGTH_ERROR -200 
+#define SERVER_RESPONSE_INSERT_FLIGHT_OK "Flight added successfully"
+#define SERVER_RESPONSE_INSERT_PLANE_OK "Plane added successfully"
+#define SERVER_RESPONSE_DELETE_FLIGHT_OK "Flight removed successfully"
+#define SERVER_RESPONSE_DELETE_PLANE_OK "Plane removed successfully"
 
 //SERVER/CLIENT BYTES
 #define CMD_BYTES sizeof(cmd_id)

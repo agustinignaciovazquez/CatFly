@@ -14,7 +14,7 @@ int connectToServer(const char * address, int port){
     socket = createSocket(address, port);
     if(socket == SERVER_CONNECTION_ERROR)
     	return SERVER_CONNECTION_ERROR;
-     
+    
     return serverHandler(socket);
 } 
 
