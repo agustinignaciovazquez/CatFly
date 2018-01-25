@@ -23,6 +23,7 @@ typedef int cmd_int;
 #define DELETE_FLIGHT_RESERVATION_CMD 'J'
 #define LENGTH_CODE_CMD 'L'
 #define RESPONSE_CODE_CMD 'R'
+#define ERROR_CODE_CMD 'X'
 #define DISCONNECT_CMD 'Q'
 
 //SERVER/CLIENT CODES
