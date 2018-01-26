@@ -214,7 +214,7 @@ int deletePlane(const char * command, int size, char * * response, int * respons
 	}
 
 	msg = deletePlane_DB(p,db);
-	freeExpandedPlane(p);
+	freeExpandedPlane(p, FALSE);
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
