@@ -4,7 +4,7 @@
 #define TRUE 1
 #define FALSE 0
 
-//#define DEBUG //COMMENT THIS IN FINAL REV
+#define DEBUG //COMMENT THIS IN FINAL REV
 
 //TYPEDEFS 
 typedef unsigned char cmd_id;
@@ -22,6 +22,7 @@ typedef int cmd_int;
 #define INSERT_FLIGHT_RESERVATION_CMD 'I'
 #define DELETE_FLIGHT_RESERVATION_CMD 'J'
 #define LENGTH_CODE_CMD 'L'
+#define REQUEST_CODE_CMD 'T'
 #define RESPONSE_CODE_CMD 'R'
 #define ERROR_CODE_CMD 'X'
 #define DISCONNECT_CMD 'Q'

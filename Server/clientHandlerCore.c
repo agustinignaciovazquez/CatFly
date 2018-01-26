@@ -15,9 +15,9 @@ int sendDataAndLengthToClient(int socket, char * data, int bytes);
 
 int clientHandler(int socket){
 	int con_status;
-	int read_size, response_size, response_status;
+	int read_size, response_status, response_size = 0;
 	char read_buffer[SERVER_MAX_INPUT_LENGTH];
-	char * response_buffer;
+	char * response_buffer = NULL;
 
 	while(TRUE){
 		//Receive data from socket
@@ -32,12 +32,14 @@ int clientHandler(int socket){
 			fprintf(stderr,"Error: Parsing request ... possible hack attempt ... forcing client to disconnect \n");
 			return con_status;
 		}
-
-		//Send data to client
-		con_status = sendDataAndLengthToClient(socket,response_buffer,response_size);
-		if(con_status != SEND_DATA_OK && con_status != RESPONSE_NO){ //keep alive if client refuses to receive the length 
-			return con_status;
+		if(response_status == RESPONSE_OK || response_status == RESPONSE_OK_AND_DISCONNECT){
+			//Send data to client
+			con_status = sendDataAndLengthToClient(socket,response_buffer,response_size);
+			if(con_status != SEND_DATA_OK && con_status != RESPONSE_NO){ //keep alive if client refuses to receive the length 
+				return con_status;
+			}
 		}
+		
 	}
 
 	return con_status;

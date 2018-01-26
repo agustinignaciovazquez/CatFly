@@ -3,7 +3,7 @@
 
 #include "coreStructs.h"
 
-#define EXPAND_ERROR 0
+#define EXPAND_ERROR -77
 #define EXPAND_OK 1
 
 Flight * expandFlight(Flight * fl);
