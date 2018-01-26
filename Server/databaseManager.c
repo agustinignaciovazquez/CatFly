@@ -23,15 +23,9 @@ void bindPlaneDeleteData(const char * planeModel, sqlite3_stmt * stmt);
 void bindFlightDeleteData(const char * planeModel, sqlite3_stmt * stmt);
 void bindReservationInsertData(const Reservation * r, sqlite3_stmt * stmt);
 void bindReservationDeleteData(const Reservation * r, sqlite3_stmt * stmt);
-/*
-sqlite3_bind_text(stmt, 1, "Susan", -1, SQLITE_STATIC);                                        
-	sqlite3_bind_int(stmt, 2, 21);  
-	
-	while((rc = sqlite3_step(stmt)) == SQLITE_ROW){
-		sqlite3_column_text(stmt, 0), sqlite3_column_int(stmt, 1)
-*/
-  /* if(rc != SQLITE_DONE) // if rc returns this there is no data
-      return rc;*/
+void bindGetReservation(const char * flightCode, sqlite3_stmt * stmt);
+void setReservationData(ReservationMinimal * rm, sqlite3_stmt * stmt);
+
 Flights * getFlights_DB(sqlite3 * db){
 	int rc;
 	sem_t * sem, * sem_2;
@@ -240,6 +234,7 @@ void setPlaneData(Plane * p, sqlite3_stmt * stmt){
 	p->columns = (int) sqlite3_column_int(stmt, P_COLUMNS_COLUMN);
 }
 
+/* returns the plane from a flight WARNING (use semaphores when calling this function) */
 Plane * getPlaneFromFlight_DB(const char * flightCode, sqlite3 * db){
 	int rc;
 	sqlite3_stmt * stmt;
@@ -427,6 +422,20 @@ void bindReservationInsertData(const Reservation * r, sqlite3_stmt * stmt){
 	sqlite3_bind_text(stmt, R_PASSPORTID_COLUMN+1, r->passportID, -1, SQLITE_STATIC); 
 }
 
+simpleMessage * insertReservation_DB_wMessage(Reservation * r, sqlite3 * db){
+	simpleMessage * msg = expandSimpleMessage();
+	if(msg == NULL)
+		return NULL;
+
+	if(insertReservation_DB(r,db) == SQLITE_OK){
+		setSimpleMessageSettings(msg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_RES_OK);
+	}else{
+		setSimpleMessageSettings(msg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_RES_ERROR);
+	}
+
+	return msg;
+}
+
 int deleteReservation_DB(Reservation * r, sqlite3 * db){
 	int rc;
 	sqlite3_stmt * stmt;
@@ -448,4 +457,72 @@ void bindReservationDeleteData(const Reservation * r, sqlite3_stmt * stmt){
 	sqlite3_bind_text(stmt, R_FLIGHT_CODE_COLUMN+1, r->flightCode, -1, SQLITE_STATIC); 
 	sqlite3_bind_int(stmt, R_SEAT_ROW_COLUMN+1, r->seatRow); 
   	sqlite3_bind_int(stmt, R_SEAT_COLUMN_COLUMN+1, r->seatColumn); 
+}
+
+flightReservations * getReservations_DB(const char * flightCode, sqlite3 * db){
+	int rc;
+	flightReservations * reservations;
+	ReservationMinimal rm;
+	sem_t * sem, *sem_1, *sem_2;
+	sqlite3_stmt * stmt;
+
+	reservations = expandFlightReservations();
+	if(reservations == NULL)
+		return NULL;
+
+	sem = openMutexSemaphore(_SEMAPHORE_RESERVATION_NAME_);
+	sem_1 = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_); 
+	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_); 
+	sem_wait(sem_1);//block flight queries
+	sem_wait(sem_2);//block plane queries 
+	sem_wait(sem);
+
+	if((reservations->planeSeats = getPlaneFromFlight_DB(flightCode, db)) == NULL){
+		SEM_POST_N_CLOSE(sem_1);
+		SEM_POST_N_CLOSE(sem_2);
+		SEM_POST_N_CLOSE(sem);
+		freeFlightReservations(reservations);
+		return NULL;
+	}
+
+	rc = sqlite3_prepare_v2(db, DB_GET_RESERVATIONS_QUERY, -1, &stmt, 0);
+	if(rc != SQLITE_OK){
+		SEM_POST_N_CLOSE(sem_1);
+		SEM_POST_N_CLOSE(sem_2);
+		SEM_POST_N_CLOSE(sem);
+		freeFlightReservations(reservations);
+		return NULL;
+	}
+
+	bindGetReservation(flightCode, stmt);
+	while((rc = sqlite3_step(stmt)) == SQLITE_ROW){
+		setReservationData(&rm,stmt);
+		if(addReservation(reservations,&rm) != EXPAND_OK){
+			SEM_POST_N_CLOSE(sem_1);
+			SEM_POST_N_CLOSE(sem_2);
+			SEM_POST_N_CLOSE(sem);
+			freeFlightReservations(reservations);
+			return NULL;
+		}
+	}	
+
+	rc = sqlite3_finalize(stmt);
+
+	SEM_POST_N_CLOSE(sem_1);
+	SEM_POST_N_CLOSE(sem_2);
+	SEM_POST_N_CLOSE(sem);
+
+	if(rc != SQLITE_OK){
+		freeFlightReservations(reservations);
+		return NULL;
+	}
+
+	return reservations;
+}
+void bindGetReservation(const char * flightCode, sqlite3_stmt * stmt){
+	sqlite3_bind_text(stmt, 1, flightCode, -1, SQLITE_STATIC); 
+}
+void setReservationData(ReservationMinimal * rm, sqlite3_stmt * stmt){
+	rm->seatRow = (int) sqlite3_column_int(stmt, R_SEAT_ROW_COLUMN);
+	rm->seatColumn = (int) sqlite3_column_int(stmt, R_SEAT_COLUMN_COLUMN);
 }
