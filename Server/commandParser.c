@@ -151,7 +151,7 @@ int deleteFlight(const char * command, int size, char * * response, int * respon
 		return PARSE_ERROR;
 	}
 
-	msg = deleteFlight_DB(f,db);
+	msg = deleteFlight_DB(f->flightCode,db);
 	freeExpandedFlight(f, FALSE);
 	if(msg == NULL)
 		return EXPAND_ERROR;
@@ -213,7 +213,7 @@ int deletePlane(const char * command, int size, char * * response, int * respons
 		return PARSE_ERROR;
 	}
 
-	msg = deletePlane_DB(p,db);
+	msg = deletePlane_DB(p->planeModel,db);
 	freeExpandedPlane(p, FALSE);
 	if(msg == NULL)
 		return EXPAND_ERROR;
