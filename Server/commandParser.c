@@ -9,9 +9,6 @@
 #include <stdlib.h>
 #include <string.h>  
 
-void printFlights(Flights * fls);
-void printFlight(Flight * fl);
-
 int getAllFlights(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int getFlightInfo(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int insertFlight(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
@@ -94,23 +91,6 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 	}
 	closeDatabase(db);
 	return r;
-}
-
-void printFlight(Flight * fl){
-  fprintf(stdout,"struct in : %p\nFlight Code: %s (at %p)\n", fl, fl->flightCode, (fl->flightCode));
-  fprintf(stdout,"Origin: %s (at %p)\n", fl->origin, (fl->origin));
-  fprintf(stdout,"Dest: %s (at %p)\n", fl->destination, (fl->destination));
-  fprintf(stdout,"dep date: %s (at %p)\n", fl->departureDate, (fl->departureDate));
-  fprintf(stdout,"arr date: %s (at %p)\n", fl->arrivalDate, (fl->arrivalDate));
-  fprintf(stdout,"plane model: %s (at %p)\n", fl->planeModel, (fl->planeModel));
-}
-void printFlights(Flights * fls){
-  int q,i;
-
-  for(i = 0, q = fls->qFlights; i<q;i++ ){
-    Flight * f = fls->flights + i;
-    printFlight(f);
-  }
 }
 
 int getAllFlights(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
