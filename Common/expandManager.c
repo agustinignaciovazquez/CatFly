@@ -260,6 +260,8 @@ void ResMinDeepCopy(ReservationMinimal * dest, const ReservationMinimal * rs){
 }
 
 void freeExpandedSimpleMessage(simpleMessage * sMgs){
+	if(sMgs == NULL)
+		return;
 	#ifdef DEBUG
 		fprintf(stdout, "Free msg STR in (%p)\n", sMgs->msg);
 		fprintf(stdout, "Free struct in (%p)\n", sMgs);
@@ -269,6 +271,8 @@ void freeExpandedSimpleMessage(simpleMessage * sMgs){
 }
 
 void freeFlightReservations(flightReservations * frs){
+	if(frs == NULL)
+		return;
 	#ifdef DEBUG
 		fprintf(stdout, "Free FLIGHTCODE STR in (%p)\n", frs->flightCode);
 		fprintf(stdout, "Free array reservations in (%p)\n", frs->reservations);
@@ -283,6 +287,8 @@ void freeFlightReservations(flightReservations * frs){
 void freeFlights(Flights * fls){
 	int i,q;
 	Flight * f;
+	if(fls == NULL)
+		return;
 	q = fls->qFlights;
 	#ifdef DEBUG
 		fprintf(stdout, "Free array flights in (%p)\n", fls->flights);
@@ -299,7 +305,10 @@ void freeFlights(Flights * fls){
 void freePlanes(Planes * pls){
 	int i,q;
 	Plane * p;
+	if(pls == NULL)
+		return;
 	q = pls->qPlanes;
+
 	#ifdef DEBUG
 		fprintf(stdout, "Free array planes in (%p)\n", pls->planes);
 		fprintf(stdout, "Free struct in (%p)\n", pls);
@@ -313,6 +322,8 @@ void freePlanes(Planes * pls){
 }
 
 void freeExpandedReservation(Reservation * res, int isArray){
+	if(res == NULL)
+		return;
 	#ifdef DEBUG
 		fprintf(stdout, "Free FLIGHTCODE STR in (%p)\n", res->flightCode);
 		fprintf(stdout, "Free PASSPORTID STR in (%p)\n", res->passportID);
@@ -326,6 +337,8 @@ void freeExpandedReservation(Reservation * res, int isArray){
 }
 
 void freeExpandedPlane(Plane * pl, int isArray){
+	if(pl == NULL)
+		return;
 	#ifdef DEBUG
 	fprintf(stdout, "Free PLANE_MODEL STR in (%p)\n", pl->planeModel);
 	#endif
@@ -335,6 +348,8 @@ void freeExpandedPlane(Plane * pl, int isArray){
 }
 
 void freeExpandedFlight(Flight * fl, int isArray){
+	if(fl == NULL)
+		return;
 	#ifdef DEBUG
 		fprintf(stdout, "Free FLCODE STR in (%p)\n", fl->flightCode);
 		fprintf(stdout, "Free ORIGIN STR in (%p)\n", fl->origin);
