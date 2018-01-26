@@ -462,6 +462,7 @@ void bindReservationDeleteData(const Reservation * r, sqlite3_stmt * stmt){
 flightReservations * getReservations_DB(const char * flightCode, sqlite3 * db){
 	int rc;
 	flightReservations * reservations;
+	Plane * p;
 	ReservationMinimal rm;
 	sem_t * sem, *sem_1, *sem_2;
 	sqlite3_stmt * stmt;
@@ -477,14 +478,16 @@ flightReservations * getReservations_DB(const char * flightCode, sqlite3 * db){
 	sem_wait(sem_2);//block plane queries 
 	sem_wait(sem);
 
-	if((reservations->planeSeats = getPlaneFromFlight_DB(flightCode, db)) == NULL){
+	if((p = getPlaneFromFlight_DB(flightCode, db)) == NULL){
 		SEM_POST_N_CLOSE(sem_1);
 		SEM_POST_N_CLOSE(sem_2);
 		SEM_POST_N_CLOSE(sem);
 		freeFlightReservations(reservations);
 		return NULL;
 	}
-
+	setFlightReservationsSettings(reservations, flightCode, p);
+	freeExpandedPlane(p);
+	
 	rc = sqlite3_prepare_v2(db, DB_GET_RESERVATIONS_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
 		SEM_POST_N_CLOSE(sem_1);

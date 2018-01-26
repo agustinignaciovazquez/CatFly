@@ -27,19 +27,21 @@ int clientHandler(int socket){
 		}
 		
 		response_status = parseRequest(read_buffer, read_size, &response_buffer, &response_size);
-		if(response_status == PARSE_ERROR){
+		//disconnect only if request it or parse error (TCP protocol ensures data is received correctly)
+		if(response_status == PARSE_ERROR || response_status == RESPONSE_OK_AND_DISCONNECT){ 
 			con_status = CLIENT_DISCONNECT;
-			fprintf(stderr,"Error: Parsing request ... possible hack attempt ... forcing client to disconnect \n");
+			if(response_status == PARSE_ERROR)
+				fprintf(stderr,"Error: Parsing request ... possible hack attempt ... forcing client to disconnect \n");
 			return con_status;
 		}
-		if(response_status == RESPONSE_OK || response_status == RESPONSE_OK_AND_DISCONNECT){
+		if(response_status == RESPONSE_OK){
 			//Send data to client
 			con_status = sendDataAndLengthToClient(socket,response_buffer,response_size);
+			freeSerialized(response_buffer);
 			if(con_status != SEND_DATA_OK && con_status != RESPONSE_NO){ //keep alive if client refuses to receive the length 
 				return con_status;
 			}
 		}
-		
 	}
 
 	return con_status;

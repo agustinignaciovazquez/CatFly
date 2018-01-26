@@ -228,5 +228,8 @@ int copyBytes(void * dest, const void * data, int bytes){
 }
 
 void freeSerialized(char * s){
+	#ifdef DEBUG
+		fprintf(stdout, "Free serialized data in (%p)\n", s);
+	#endif
 	free(s);
 }
