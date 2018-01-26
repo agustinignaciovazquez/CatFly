@@ -486,7 +486,7 @@ flightReservations * getReservations_DB(const char * flightCode, sqlite3 * db){
 		return NULL;
 	}
 	setFlightReservationsSettings(reservations, flightCode, p);
-	freeExpandedPlane(p);
+	freeExpandedPlane(p, FALSE);
 	
 	rc = sqlite3_prepare_v2(db, DB_GET_RESERVATIONS_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){

@@ -117,11 +117,17 @@ int insertFlight(const char * command, int size, char * * response, int * respon
 	Flight * f;
 	simpleMessage * msg;
 
-	if((f = deserializeFlight(command, size)) == DESERIALIZE_ERROR)
+	f = expandFlight(NULL);
+	if(f == NULL)
+		return EXPAND_ERROR;
+	
+	if(deserializeFlight(command, size, f) == DESERIALIZE_ERROR){
+		freeExpandedFlight(f, FALSE);
 		return PARSE_ERROR;
+	}
 
 	msg = insertFlight_DB(f,db);
-	freeExpandedFlight(f);
+	freeExpandedFlight(f, FALSE);
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
@@ -135,11 +141,18 @@ int deleteFlight(const char * command, int size, char * * response, int * respon
 	Flight * f;
 	simpleMessage * msg;
 
-	if((f = deserializeFlight(command, size)) == DESERIALIZE_ERROR)
+	f = expandFlight(NULL);
+	if(f == NULL)
+		return EXPAND_ERROR;
+	
+
+	if(deserializeFlight(command, size, f) == DESERIALIZE_ERROR){
+		freeExpandedFlight(f, FALSE);
 		return PARSE_ERROR;
+	}
 
 	msg = deleteFlight_DB(f,db);
-	freeExpandedFlight(f);
+	freeExpandedFlight(f, FALSE);
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
@@ -165,11 +178,18 @@ int insertPlane(const char * command, int size, char * * response, int * respons
 	Plane * p;
 	simpleMessage * msg;
 
-	if((p = deserializePlane(command, size)) == DESERIALIZE_ERROR)
+	p = expandPlane(NULL);
+	if(p == NULL)
+		return EXPAND_ERROR;
+	
+
+	if(deserializePlane(command, size,p) == DESERIALIZE_ERROR){
+		freeExpandedPlane(p, FALSE);
 		return PARSE_ERROR;
+	}
 
 	msg = insertPlane_DB(p,db);
-	freeExpandedPlane(p);
+	freeExpandedPlane(p, FALSE);
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
@@ -183,8 +203,15 @@ int deletePlane(const char * command, int size, char * * response, int * respons
 	Plane * p;
 	simpleMessage * msg;
 
-	if((p = deserializePlane(command, size)) == DESERIALIZE_ERROR)
+	p = expandPlane(NULL);
+	if(p == NULL)
+		return EXPAND_ERROR;
+	
+
+	if(deserializePlane(command, size,p) == DESERIALIZE_ERROR){
+		freeExpandedPlane(p, FALSE);
 		return PARSE_ERROR;
+	}
 
 	msg = deletePlane_DB(p,db);
 	freeExpandedPlane(p);
@@ -200,11 +227,19 @@ int deletePlane(const char * command, int size, char * * response, int * respons
 int getReservations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
 	flightReservations * frs;
 	Flight * f;
-	if((f = deserializeFlight(command, size)) == DESERIALIZE_ERROR)
+
+	f = expandFlight(NULL);
+	if(f == NULL)
+		return EXPAND_ERROR;
+	
+
+	if(deserializeFlight(command, size, f) == DESERIALIZE_ERROR){
+		freeExpandedFlight(f, FALSE);
 		return PARSE_ERROR;
+	}
 
 	frs = getReservations_DB(f->flightCode,db);
-	freeExpandedFlight(f);
+	freeExpandedFlight(f, FALSE);
 	if(frs == NULL)
 		return SQL_ERROR;
 	
@@ -218,11 +253,17 @@ int insertReservation(const char * command, int size, char * * response, int * r
 	Reservation * res;
 	simpleMessage * msg;
 
-	if((res = deserializeReservation(command, size)) == DESERIALIZE_ERROR)
+	res = expandReservation(NULL);
+	if(res == NULL)
+		return EXPAND_ERROR;
+	
+	if(deserializeReservation(command, size, res) == DESERIALIZE_ERROR){
+		freeExpandedReservation(res, FALSE);
 		return PARSE_ERROR;
+	}
 
 	msg = insertReservation_DB_wMessage(res,db);
-	freeExpandedReservation(res);
+	freeExpandedReservation(res, FALSE);
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
