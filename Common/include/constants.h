@@ -38,7 +38,8 @@ typedef int cmd_int;
 #define SERVER_RESPONSE_INSERT_FLIGHT_OK "Flight added successfully"
 #define SERVER_RESPONSE_INSERT_PLANE_OK "Plane added successfully"
 #define SERVER_RESPONSE_INSERT_RES_OK "Reservation added successfully"
-#define SERVER_RESPONSE_INSERT_RES_ERROR "Error adding reservation"
+#define SERVER_RESPONSE_INSERT_RES_ERROR "Error adding reservation. Try again later."
+#define SERVER_RESPONSE_INSERT_RES_NOT_AVAILABLE "Error seats are already occupied. Please select other"
 #define SERVER_RESPONSE_DELETE_FLIGHT_OK "Flight removed successfully"
 #define SERVER_RESPONSE_DELETE_PLANE_OK "Plane removed successfully"
 

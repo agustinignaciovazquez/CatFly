@@ -22,6 +22,6 @@ Planes * getPlanes_DB(sqlite3 * db);
 simpleMessage * insertPlane_DB(Plane * p, sqlite3 * db);
 simpleMessage * deletePlane_DB(const char * planeModel, sqlite3 * db);
 flightReservations * getReservations_DB(const char * flightCode, sqlite3 * db);
-simpleMessage * insertReservation_DB_wMessage(Reservation * r, sqlite3 * db);
+simpleMessage * insertReservation_DB(Reservation * r, sqlite3 * db);
 #endif
  

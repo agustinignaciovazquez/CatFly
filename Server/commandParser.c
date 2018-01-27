@@ -269,7 +269,7 @@ int insertReservation(const char * command, int size, char * * response, int * r
 		return PARSE_ERROR;
 	}
 
-	msg = insertReservation_DB_wMessage(res,db);
+	msg = insertReservation_DB(res,db);
 	freeExpandedReservation(res, FALSE);
 	if(msg == NULL)
 		return EXPAND_ERROR;
