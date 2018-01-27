@@ -24,12 +24,17 @@ typedef int cmd_int;
 #define LENGTH_CODE_CMD 'L'
 #define REQUEST_CODE_CMD 'T'
 #define RESPONSE_CODE_CMD 'R'
+#define HELLO_CODE_CMD 'V'
+#define HELLO_ADMIN_CODE_CMD 'v'
 #define ERROR_CODE_CMD 'X'
 #define DISCONNECT_CMD 'Q'
 
 //SERVER/CLIENT CODES
 #define CLIENT_RESPONSE_LENGTH_OK 200
 #define CLIENT_RESPONSE_LENGTH_ERROR -200 
+#define CLIENT_HELLO_OK 500
+#define CLIENT_ADMIN_HELLO_OK 777
+#define SERVER_HELLO_OK 501
 #define SERVER_RESPONSE_INSERT_FLIGHT_OK "Flight added successfully"
 #define SERVER_RESPONSE_INSERT_PLANE_OK "Plane added successfully"
 #define SERVER_RESPONSE_INSERT_RES_OK "Reservation added successfully"

@@ -12,13 +12,18 @@
 int getDataFromClient(int socket, char * buffer, int max_bytes, int * data_size);
 int sendDataToClient(int socket, char * data, int bytes);
 int sendDataAndLengthToClient(int socket, char * data, int bytes);
+int getHelloFromClient(int socket, int * isAdmin);
 
 int clientHandler(int socket){
 	int con_status;
 	int read_size, response_status, response_size = 0;
+	int isAdmin;
 	char read_buffer[SERVER_MAX_INPUT_LENGTH];
 	char * response_buffer = NULL;
 
+	con_status = getHelloFromClient(socket, &isAdmin);
+	if(con_status != HELLO_OK)
+		return con_status;
 	while(TRUE){
 		//Receive data from socket
 		con_status = getDataFromClient(socket,read_buffer,SERVER_MAX_INPUT_LENGTH,&read_size);
@@ -26,7 +31,7 @@ int clientHandler(int socket){
 			return con_status;
 		}
 		
-		response_status = parseRequest(read_buffer, read_size, &response_buffer, &response_size);
+		response_status = parseRequest(read_buffer, read_size, &response_buffer, &response_size, isAdmin);
 		//disconnect only if request it or parse error (TCP protocol ensures data is received correctly)
 		if(response_status == PARSE_ERROR || response_status == RESPONSE_OK_AND_DISCONNECT){ 
 			con_status = CLIENT_DISCONNECT;
@@ -46,6 +51,40 @@ int clientHandler(int socket){
 
 	return con_status;
 } 
+
+int getHelloFromClient(int socket, int * isAdmin){
+	int status, bytes;
+	char * bytes_aux, data[SERVER_MAX_INPUT_LENGTH];
+	simpleCommand simpleCmd = {.command = HELLO_CODE_CMD, .extra = SERVER_HELLO_OK};
+
+	//Get hello from client
+	status = getDataFromClient(socket,data,SERVER_MAX_INPUT_LENGTH,&bytes);
+	if(status != RECEIVE_DATA_OK)
+		return status;
+	
+	status = verifyHelloResponse(data, bytes);
+	if(status != RESPONSE_OK){
+		//Verify admin secret code
+		status = verifyHelloAdminResponse(data, bytes);
+		*isAdmin = (status == RESPONSE_OK)? TRUE:FALSE;
+		if(isAdmin == FALSE)
+			return HELLO_ERROR;
+	}
+	#ifdef DEBUG
+		printf("Received hello OK from client\n");
+	#endif
+	//Say hello to client
+	bytes_aux = serializeSimpleCommand(&simpleCmd, &bytes);
+	if(bytes_aux == NULL)
+		return SEND_DATA_ERROR;
+
+	status = sendDataToClient(socket, bytes_aux, bytes);
+	freeSerialized(bytes_aux);
+	if(status != SEND_DATA_OK)
+		return status;
+
+	return HELLO_OK;
+}
 
 int getDataFromClient(int socket, char * buffer, int max_bytes, int * data_size){
 	int read_size;

@@ -1,5 +1,4 @@
 #include "commandParser.h"
-#include "constants.h"
 #include "serializeManager.h"
 #include "deserializeManager.h"
 #include "expandManager.h"
@@ -21,7 +20,7 @@ int insertReservation(const char * command, int size, char * * response, int * r
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int disconnectClient(char * * response, int * response_bytes, sqlite3 * db);
 
-int verifyResponseFromClient(const char * data, int bytes, int responseID){
+int verifySimpleCmdFromClient(const char * data, int bytes, cmd_id type_id,int responseID){
 	simpleCommand simpleCmd;
 
 	if(deserializeSimpleCommand(data, bytes, &simpleCmd) == DESERIALIZE_ERROR)
@@ -32,17 +31,22 @@ int verifyResponseFromClient(const char * data, int bytes, int responseID){
 	#endif
 
 	//VERIFY COMMAND MATCHES RESPONSE_CODE
-	if(simpleCmd.command != RESPONSE_CODE_CMD)
+	if(simpleCmd.command != type_id)
 		return RESPONSE_ERROR;
 
 	return (simpleCmd.extra == responseID)? RESPONSE_OK : RESPONSE_NO;
 }
 
 int veryfyLengthResponse(const char * data, int bytes){
-	return verifyResponseFromClient(data,bytes,CLIENT_RESPONSE_LENGTH_OK);
+	return verifySimpleCmdFromClient(data,bytes,RESPONSE_CODE_CMD, CLIENT_RESPONSE_LENGTH_OK);
 }
-
-int parseRequest(const char * command, int size, char * * response, int * response_bytes){
+int verifyHelloResponse(const char * data, int bytes){
+	return verifySimpleCmdFromClient(data,bytes,HELLO_CODE_CMD,CLIENT_HELLO_OK);
+}
+int verifyHelloAdminResponse(const char * data, int bytes){
+	return verifySimpleCmdFromClient(data,bytes,HELLO_ADMIN_CODE_CMD,CLIENT_ADMIN_HELLO_OK);
+}
+int parseRequest(const char * command, int size, char * * response, int * response_bytes, int isAdmin){
 	cmd_id action;
 	int r;
 	sqlite3 * db;
@@ -50,31 +54,14 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 
 	if(openDatabase(&db) != SQLITE_OK)
 		return SQL_ERROR;
+	r = PARSE_ERROR;
 
 	switch(action){
 		case GET_FLIGHTS_CMD:
 			r = getAllFlights(command, size, response, response_bytes, db);
 			break;
-		case INSERT_FLIGHT_CMD:
-			r = insertFlight(command, size, response, response_bytes, db);
-			break;
-		case DELETE_FLIGHT_CMD:
-			r = deleteFlight(command, size, response, response_bytes, db);
-			break;
-		case GET_PLANES_CMD:
-			r = getPlanes(command, size, response, response_bytes, db);
-			break;
-		case INSERT_PLANE_CMD:
-			r = insertPlane(command, size, response, response_bytes, db);
-			break;
-		case DELETE_PLANE_CMD:
-			r = deletePlane(command, size, response, response_bytes, db);
-			break;
 		case GET_FLIGHT_RESERVATION_CMD:
 			r = getReservations(command, size, response, response_bytes, db);
-			break;
-		case GET_FLIGHT_CANCELATIONS_CMD:
-			r = getFlightCancelations(command, size, response, response_bytes, db);
 			break;
 		case INSERT_FLIGHT_RESERVATION_CMD:
 			r = insertReservation(command, size, response, response_bytes, db);
@@ -85,9 +72,29 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 		case DISCONNECT_CMD:
 			r = disconnectClient(response, response_bytes, db);
 			break;
-		default:
-			r = PARSE_ERROR;
-			break;
+	}
+
+	if(isAdmin == TRUE){
+		switch(action){
+			case INSERT_FLIGHT_CMD:
+				r = insertFlight(command, size, response, response_bytes, db);
+				break;
+			case DELETE_FLIGHT_CMD:
+				r = deleteFlight(command, size, response, response_bytes, db);
+				break;
+			case GET_PLANES_CMD:
+				r = getPlanes(command, size, response, response_bytes, db);
+				break;
+			case INSERT_PLANE_CMD:
+				r = insertPlane(command, size, response, response_bytes, db);
+				break;
+			case DELETE_PLANE_CMD:
+				r = deletePlane(command, size, response, response_bytes, db);
+				break;
+			case GET_FLIGHT_CANCELATIONS_CMD:
+				r = getFlightCancelations(command, size, response, response_bytes, db);
+				break;
+		}
 	}
 	closeDatabase(db);
 	return r;
@@ -274,8 +281,8 @@ int insertReservation(const char * command, int size, char * * response, int * r
 }
 
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
-	*response = DISCONNECT_CODE;
-	*response_bytes = DISCONNECT_CODE_LEN;
+	*response = "DEL";
+	*response_bytes = 4;
 	return RESPONSE_OK;
 }
 

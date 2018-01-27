@@ -5,6 +5,9 @@
 
 #define SERVER_MAX_INPUT_LENGTH 777
 
+#define HELLO_ERROR -4
+#define HELLO_OK 4
+
 #define RESERVE_MEM_ERROR -3
 #define RECEIVE_DATA_ERROR -1
 #define RECEIVE_DATA_OK 1

@@ -11,13 +11,18 @@
 int getDataFromServer(int socket, char * buffer, int max_bytes, int * data_size);
 int sendDataToServer(int socket, char * data, int bytes);
 int getDataAndLengthFromServer(int socket, char * * data, int * bytes);
+int getHelloFromServer(int socket, int isAdmin);
 
 int serverHandler(int socket){
 	int con_status;
+	int isAdmin;
 	int read_size, send_size;
 	char * send_buffer;
 	char * read_buffer;
-
+	isAdmin = TRUE; //TODO CHANGE LATER
+	con_status = getHelloFromServer(socket, isAdmin);
+	if(con_status != HELLO_OK)
+		return con_status;
 	while(TRUE){
 		send_buffer = "A";
 		send_size = strlen(send_buffer);
@@ -41,7 +46,44 @@ int serverHandler(int socket){
 
 	return con_status;
 }
+int getHelloFromServer(int socket, int isAdmin){
+	int status, bytes;
+	char * bytes_aux, data[SERVER_MAX_INPUT_LENGTH];
+	simpleCommand simpleCmd = {.command = HELLO_CODE_CMD, .extra = CLIENT_HELLO_OK};
 
+	if(isAdmin == TRUE){
+		simpleCmd.command = HELLO_ADMIN_CODE_CMD;
+		simpleCmd.extra = CLIENT_ADMIN_HELLO_OK;
+	}
+
+	//Say hello to server
+	bytes_aux = serializeSimpleCommand(&simpleCmd, &bytes);
+	if(bytes_aux == NULL)
+		return SEND_DATA_ERROR;
+
+	status = sendDataToServer(socket, bytes_aux, bytes);
+	freeSerialized(bytes_aux);
+	if(status != SEND_DATA_OK)
+		return status;
+
+	//Get hello from server
+	status = getDataFromServer(socket,data,SERVER_MAX_INPUT_LENGTH,&bytes);
+	if(status != RECEIVE_DATA_OK)
+		return status;
+	
+	if(deserializeSimpleCommand(data, bytes, &simpleCmd) == DESERIALIZE_ERROR)
+		return RECEIVE_DATA_ERROR;
+	
+	//VERIFY RESPONSE MATCHES HELLO COMMAND
+	if(!(simpleCmd.command == HELLO_CODE_CMD && simpleCmd.extra == SERVER_HELLO_OK))
+		return HELLO_ERROR;
+
+	#ifdef DEBUG
+		printf("Received hello OK from server\n");
+	#endif
+	
+	return HELLO_OK;
+}
 int getDataFromServer(int socket, char * buffer, int max_bytes, int * data_size){
 	int read_size;
 
