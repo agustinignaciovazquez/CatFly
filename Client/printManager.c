@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> 
-
+int numPlaces (int n);
 void printFlight(Flight * fl){
   fprintf(stdout,"Flight Code: %s\n", fl->flightCode);
   fprintf(stdout,"Origin: %s\n", fl->origin);
@@ -49,20 +49,29 @@ void printPlanes(Planes * pls){
 }
 
 void printReservations(char * * reservations, int rows, int columns){
-    int i,j;
+    int i,j,spaces,s;
 
     printf("ROWSxCOLUMNS \n\t");
     for(j = 0; j < columns; j++){
-      printf("%d ", (j+1));
+      printf(" %d", (j+1));
     }
     printf("\n\n");
 
     for(i = 0; i < rows; i++){
       printf("%d \t", (i+1));
       for(j = 0; j < columns; j++){
-        printf("%c ", reservations[i][j]+'O');
+        spaces = numPlaces(j+1);
+        for(s = 0; s < spaces;s++){
+          putchar(' ');
+        }
+        printf("%c", reservations[i][j]+'_');
       }
       printf("\n");
     }
 }
 
+int numPlaces (int n) {
+    if (n < 0) return numPlaces (-n);
+    if (n < 10) return 1;
+    return 1 + numPlaces (n / 10);
+}

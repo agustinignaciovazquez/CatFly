@@ -1,6 +1,8 @@
 #include "clientCore.h"
 #include "coreStructs.h"
 #include "constants.h"
+#include "printManager.h"
+#include "utilsCore.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  
@@ -13,7 +15,8 @@ int main(int argc , char *argv[]){
   	int status;
   	char * address = SERVER_ADDR;
   	int port = 7777;
-
+    char * * res = dinamicMatrix(30,30);
+    printReservations(res,30,30);
   	status = connectToServer(address,port);
   	switch(status){
   		case SERVER_CONNECTION_ERROR:
