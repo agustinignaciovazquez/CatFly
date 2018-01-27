@@ -22,7 +22,7 @@ int serverHandler(int socket){
 	isAdmin = TRUE; //TODO CHANGE LATER
 	con_status = getHelloFromServer(socket, isAdmin);
 	if(con_status != HELLO_OK)
-		return con_status;
+		return HELLO_ERROR;
 	while(TRUE){
 		send_buffer = "A";
 		send_size = strlen(send_buffer);

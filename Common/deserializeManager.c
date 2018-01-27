@@ -26,6 +26,8 @@ int deserializeSimpleCommand(const char * data, int size, simpleCommand * cmd){
 	cmd->command = deserializeCommand(&aux, &size); //Never returns PARSE_ERROR because previous check
 	aux += copyBytes(&(cmd->extra), (void *) aux, sizeof(cmd->extra));
 	
+	if(size < (aux - data))
+		return DESERIALIZE_ERROR;
 	return (aux - data);
 }
 

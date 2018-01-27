@@ -1,5 +1,4 @@
 #include "clientCore.h"
-#include "serverHandlerCore.h" 
 #include "constants.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +20,7 @@ int connectToServer(const char * address, int port){
 int createSocket(const char * address, int port){
 	int sock;
     struct sockaddr_in serverAddr;
-
+    struct timeval tv; //Timeout
 	//Create socket
     sock = socket(AF_INET , SOCK_STREAM , 0);
     if (sock == -1)
@@ -30,6 +29,13 @@ int createSocket(const char * address, int port){
     //Configure the address and port of server
     configureServerSettings(address,port,&serverAddr);
 
+    //Set the timeout interval
+    tv.tv_usec = 0; 
+    tv.tv_sec = CLIENT_TIMEOUT; 
+
+    //Set the timeout to the socket
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const struct timeval *)&tv,sizeof(struct timeval)); 
+    
     //Connect to server
     if (connect(sock , (struct sockaddr *)&serverAddr , sizeof(serverAddr)) < 0)
         return SERVER_CONNECTION_ERROR;

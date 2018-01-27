@@ -12,11 +12,16 @@
 int main(int argc , char *argv[]){
   	int status;
   	char * address = SERVER_ADDR;
-  	int port = SERVER_PORT;
+  	int port = 7777;
 
   	status = connectToServer(address,port);
-  	if(status == SERVER_CONNECTION_ERROR){
-  		printf("Could not reach server ... please check address (%s) and port (%d) \n",(address == NULL)? "ANYADDR":address,port);
+  	switch(status){
+  		case SERVER_CONNECTION_ERROR:
+  			printf("Could not reach server ... please check address (%s) and port (%d) \n",(address == NULL)? "ANYADDR":address,port);
+  			break;
+  		case HELLO_ERROR:
+  			printf("Hello request failed ... check address (%s) and port (%d) is the correct Server\n",(address == NULL)? "ANYADDR":address,port);
+  			break;
   	}
   	
     return status;

@@ -74,6 +74,6 @@ FOREIGN KEY (flightCode) REFERENCES flights(flightCode));"
 #define DB_GET_CANCELATIONS_QUERY "SELECT * FROM cancelations WHERE flightCode = ?;"
 
 #define DB_CHECK_RESERVATION_QUERY "SELECT count(*) FROM reservations WHERE flightCode = ? AND seatRow = ? AND seatColumn = ?;"
-
+#define DB_CHECK_CANCELATION_QUERY "SELECT count(*) FROM reservations WHERE flightCode = ? AND seatRow = ? AND seatColumn = ? AND passportID = ?;"
 #endif
  

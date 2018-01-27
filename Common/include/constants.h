@@ -36,8 +36,10 @@
 #define SERVER_RESPONSE_INSERT_RES_OK "Reservation added successfully"
 #define SERVER_RESPONSE_INSERT_RES_ERROR "Error adding reservation. Try again later."
 #define SERVER_RESPONSE_INSERT_RES_NOT_AVAILABLE "Error seats are already occupied. Please select other"
+#define SERVER_RESPONSE_INSERT_CANCELATION_OK "Reservation removed successfully"
+#define SERVER_RESPONSE_INSERT_CANCELATION_INCORRECT_PASSPORT "Passport ID does not matches with reservated seats"
+#define SERVER_RESPONSE_INSERT_CANCELATION_ERROR "Error removing reservation. Try again later."
 #define SERVER_RESPONSE_DELETE_FLIGHT_OK "Flight removed successfully"
 #define SERVER_RESPONSE_DELETE_PLANE_OK "Plane removed successfully"
-
 #endif
  

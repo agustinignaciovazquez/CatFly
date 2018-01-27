@@ -22,8 +22,11 @@ int clientHandler(int socket){
 	char * response_buffer = NULL;
 
 	con_status = getHelloFromClient(socket, &isAdmin);
-	if(con_status != HELLO_OK)
+	if(con_status != HELLO_OK){
+		fprintf(stderr,"Error: Hello failed ... disconectting\n");
 		return con_status;
+	}
+
 	while(TRUE){
 		//Receive data from socket
 		con_status = getDataFromClient(socket,read_buffer,SERVER_MAX_INPUT_LENGTH,&read_size);
@@ -58,17 +61,19 @@ int getHelloFromClient(int socket, int * isAdmin){
 	simpleCommand simpleCmd = {.command = HELLO_CODE_CMD, .extra = SERVER_HELLO_OK};
 
 	//Get hello from client
+	*isAdmin = FALSE;
 	status = getDataFromClient(socket,data,SERVER_MAX_INPUT_LENGTH,&bytes);
 	if(status != RECEIVE_DATA_OK)
 		return status;
-	
+
 	status = verifyHelloResponse(data, bytes);
-	if(status != RESPONSE_OK){
+	if(status != RESPONSE_OK){//if hello normal-user fails try hello admin
 		//Verify admin secret code
 		status = verifyHelloAdminResponse(data, bytes);
 		*isAdmin = (status == RESPONSE_OK)? TRUE:FALSE;
-		if(isAdmin == FALSE)
-			return HELLO_ERROR;
+
+		if(status != RESPONSE_OK)
+			return HELLO_ERROR;//If hello admin fails return error
 	}
 	#ifdef DEBUG
 		printf("Received hello OK from client\n");

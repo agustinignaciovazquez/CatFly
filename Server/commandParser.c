@@ -281,8 +281,27 @@ int insertReservation(const char * command, int size, char * * response, int * r
 }
 
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
-	*response = "DEL";
-	*response_bytes = 4;
+	Reservation * res;
+	simpleMessage * msg;
+
+	res = expandReservation(NULL);
+	if(res == NULL)
+		return EXPAND_ERROR;
+	
+	if(deserializeReservation(command, size, res) == DESERIALIZE_ERROR){
+		freeExpandedReservation(res, FALSE);
+		return PARSE_ERROR;
+	}
+
+	msg = insertCancellation_DB(res,db);
+	freeExpandedReservation(res, FALSE);
+	if(msg == NULL)
+		return EXPAND_ERROR;
+
+	*response = serializeSimpleMessage(msg, response_bytes);
+	freeExpandedSimpleMessage(msg);
+	
+	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
 	return RESPONSE_OK;
 }
 
