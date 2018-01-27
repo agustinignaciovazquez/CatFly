@@ -24,7 +24,7 @@ int serverHandler(int socket){
 	if(con_status != HELLO_OK)
 		return HELLO_ERROR;
 	while(TRUE){
-		send_buffer = "A";
+		send_buffer = "Q";
 		send_size = strlen(send_buffer);
 
 		//Send req to server
@@ -61,7 +61,7 @@ int getHelloFromServer(int socket, int isAdmin){
 	bytes_aux = serializeSimpleCommand(&simpleCmd, &bytes);
 	if(bytes_aux == NULL)
 		return SEND_DATA_ERROR;
-
+	
 	status = sendDataToServer(socket, bytes_aux, bytes);
 	freeSerialized(bytes_aux);
 	if(status != SEND_DATA_OK)

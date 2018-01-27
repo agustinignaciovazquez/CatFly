@@ -1,6 +1,7 @@
 /* Serialize Manager */
 
 #include "serializeManager.h"
+#include "utilsCore.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -208,23 +209,6 @@ int copyFlightReservations(char * ser, const flightReservations * fres){
 	aux += copyBytes(aux, (void *)&(fres->qReservations), sizeof(fres->qReservations));
 	aux += copyReservationsMinArr(aux, fres->reservations, fres->qReservations);
 	return (aux - ser);
-}
-
-int copyStr(char * str, const char * data,  int max){
-	int i;
-
-	for(i = 0; i < max-1 && data[i] != '\0';i++){
-		str[i] = data[i];
-	}
-	str[i] = '\0';
-	i++;
-
-	return i;
-}
-
-int copyBytes(void * dest, const void * data, int bytes){
-	memcpy(dest, data, bytes);
-	return bytes;
 }
 
 void freeSerialized(char * s){

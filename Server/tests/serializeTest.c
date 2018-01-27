@@ -13,6 +13,7 @@ void printFlightReservations(flightReservations * fres);
 void printReservationMin(ReservationMinimal * resM, int size);
 void printSimpleMsg(simpleMessage * fd);
 void testSerialSimpleMsg();
+void printReservation(Reservation * res);
 
 void testSerialSimpleCMD(){
 	char * bytes_aux;
@@ -172,7 +173,6 @@ void printPlanes(Planes * pls){
     printPlane(f);
   }
 }
-void printReservation(Reservation * res);
 
 void testSerialRes(){
   char * bytes_aux;

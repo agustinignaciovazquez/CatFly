@@ -2,6 +2,7 @@
 #include "deserializeManager.h"
 #include "serializeManager.h" //copybytes and copystr
 #include "expandManager.h"
+#include "utilsCore.h"
 #include "constants.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,10 +21,11 @@ cmd_id deserializeCommand(const char * * command, int * size){
 
 int deserializeSimpleCommand(const char * data, int size, simpleCommand * cmd){
 	const char * aux;
+	int aux_size = size;
 	if(size != SIMPLE_CMD_SERIALIZE_BYTES)
 		return DESERIALIZE_ERROR;
 	aux = data;
-	cmd->command = deserializeCommand(&aux, &size); //Never returns PARSE_ERROR because previous check
+	cmd->command = deserializeCommand(&aux, &aux_size); //Never returns PARSE_ERROR because previous check
 	aux += copyBytes(&(cmd->extra), (void *) aux, sizeof(cmd->extra));
 	
 	if(size < (aux - data))

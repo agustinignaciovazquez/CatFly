@@ -1,6 +1,7 @@
 
 #include "expandManager.h"
-#include "serializeManager.h" //copybytes and copystr
+#include "serializeManager.h" 
+#include "utilsCore.h"
 #include "constants.h"
 #include <stdio.h>
 #include <stdlib.h>

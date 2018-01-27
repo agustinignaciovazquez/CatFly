@@ -78,6 +78,7 @@ int getHelloFromClient(int socket, int * isAdmin){
 	#ifdef DEBUG
 		printf("Received hello OK from client\n");
 	#endif
+	
 	//Say hello to client
 	bytes_aux = serializeSimpleCommand(&simpleCmd, &bytes);
 	if(bytes_aux == NULL)

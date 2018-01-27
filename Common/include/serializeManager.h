@@ -11,8 +11,6 @@ char * serializeFlights(Flights * fl, int * size);
 char * serializePlanes(Planes * pl, int * size);
 char * serializeFlightReservations(flightReservations * fres, int * size);
 char * serializeSimpleMessage(simpleMessage * smgs, int * size);
-int copyStr(char * str, const char * data,  int max);
-int copyBytes(void * dest, const void * data, int bytes);
 void freeSerialized(char * s);
 
 #endif
