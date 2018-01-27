@@ -3,8 +3,6 @@
 
 #include <unistd.h>    //write
 
-#define SERVER_MAX_INPUT_LENGTH 777
-
 #define HELLO_ERROR -4
 #define HELLO_OK 4
 

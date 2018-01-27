@@ -6,10 +6,6 @@
 
 #define DEBUG //COMMENT THIS IN FINAL REV
 
-//TYPEDEFS 
-typedef unsigned char cmd_id;
-typedef int cmd_int;
-
 //SERVER/CLIENT CMDS
 #define GET_FLIGHTS_CMD 'A'
 #define GET_FLIGHT_CANCELATIONS_CMD 'B'
@@ -42,12 +38,6 @@ typedef int cmd_int;
 #define SERVER_RESPONSE_INSERT_RES_NOT_AVAILABLE "Error seats are already occupied. Please select other"
 #define SERVER_RESPONSE_DELETE_FLIGHT_OK "Flight removed successfully"
 #define SERVER_RESPONSE_DELETE_PLANE_OK "Plane removed successfully"
-
-//SERVER/CLIENT BYTES
-#define CMD_BYTES sizeof(cmd_id)
-#define CODE_BYTES sizeof(cmd_int)
-#define RESPONSE_TOT_BYTES (CMD_BYTES+ CODE_BYTES)
-#define LENGTH_TOT_BYTES (CMD_BYTES+ CODE_BYTES)
 
 #endif
  

@@ -9,10 +9,20 @@
 
 #define SEM_POST_N_CLOSE(sem) {sem_post(sem);\
 								sem_close(sem);}
+								
+/* Warning all this functions are unsync use semaphores to sync them*/
+Flights * getFlights_DB_wo_Semaphores(sqlite3 * db);
 Plane * getPlaneFromFlight_DB_wo_Semaphores(const char * flightCode, sqlite3 * db);
+simpleMessage * insertFlight_DB_wo_Semaphores(Flight * f, sqlite3 * db);
+simpleMessage * deleteFlight_DB_wo_Semaphores(const char * flightCode, sqlite3 * db);
+Planes * getPlanes_DB_wo_Semaphores(sqlite3 * db);
+simpleMessage * insertPlane_DB_wo_Semaphores(Plane * p, sqlite3 * db);
+simpleMessage * deletePlane_DB_wo_Semaphores(const char * planeModel, sqlite3 * db);
 flightReservations * getReservations_DB_wo_Semaphores(const char * flightCode, sqlite3 * db);
 int insertReservation_DB_wo_Semaphores(Reservation * r, sqlite3 * db);
 int checkReservation_wo_Semaphores(Reservation * r, sqlite3 *db);
+
+
 int isValidSeat(Plane * plane, Reservation * res);
 int deleteReservation_DB(Reservation * r, sqlite3 * db);
 void setFlightData(Flight * f, sqlite3_stmt * stmt);
@@ -29,8 +39,23 @@ void bindGetReservation(const char * flightCode, sqlite3_stmt * stmt);
 void setReservationData(ReservationMinimal * rm, sqlite3_stmt * stmt);
 
 Flights * getFlights_DB(sqlite3 * db){
-	int rc;
+	Flights * fls;
 	sem_t * sem, * sem_2;
+
+	sem = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_);
+ 	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
+	sem_wait(sem);
+	sem_wait(sem_2);//block planes queries
+
+	fls = getFlights_DB_wo_Semaphores(db);
+
+	SEM_POST_N_CLOSE(sem);
+	SEM_POST_N_CLOSE(sem_2);
+	return fls;
+}
+
+Flights * getFlights_DB_wo_Semaphores(sqlite3 * db){
+	int rc;
 	sqlite3_stmt * stmt;
 	Flights * flights;
    	Flight f;
@@ -40,15 +65,8 @@ Flights * getFlights_DB(sqlite3 * db){
 		return NULL;
 	}
 
- 	sem = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_);
- 	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
-	sem_wait(sem);
-	sem_wait(sem_2);//block planes queries
-
 	rc = sqlite3_prepare_v2(db, DB_GET_FLIGHTS_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
-		SEM_POST_N_CLOSE(sem);
-		SEM_POST_N_CLOSE(sem_2);
 		freeFlights(flights);
 		return NULL;
 	}
@@ -56,17 +74,12 @@ Flights * getFlights_DB(sqlite3 * db){
 	while((rc = sqlite3_step(stmt)) == SQLITE_ROW){
 		setFlightData(&f,stmt);
 		if(addFlight(flights,&f) != EXPAND_OK){
-			SEM_POST_N_CLOSE(sem);
-			SEM_POST_N_CLOSE(sem_2);
 			freeFlights(flights);
 			return NULL;
 		}
 	}	
 
 	rc = sqlite3_finalize(stmt);
-
-	SEM_POST_N_CLOSE(sem);
-	SEM_POST_N_CLOSE(sem_2);
 
 	if(rc != SQLITE_OK){
 		freeFlights(flights);
@@ -86,8 +99,24 @@ void setFlightData(Flight * f, sqlite3_stmt * stmt){
 }
 
 simpleMessage * insertFlight_DB(Flight * f, sqlite3 * db){
-	int rc;
+	simpleMessage * smsg;
 	sem_t * sem, * sem_2;
+
+	sem = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_);
+	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
+	sem_wait(sem);
+	sem_wait(sem_2);
+
+	smsg = insertFlight_DB_wo_Semaphores(f,db);
+
+	SEM_POST_N_CLOSE(sem);
+	SEM_POST_N_CLOSE(sem_2);
+	return smsg;
+}
+
+simpleMessage * insertFlight_DB_wo_Semaphores(Flight * f, sqlite3 * db){
+	int rc;
+	
 	sqlite3_stmt * stmt;
 	simpleMessage * smsg;
 
@@ -95,15 +124,8 @@ simpleMessage * insertFlight_DB(Flight * f, sqlite3 * db){
 	if(smsg == NULL)
 		return NULL;
 
-	sem = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_);
-	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
-	sem_wait(sem);
-	sem_wait(sem_2);
-
 	rc = sqlite3_prepare_v2(db, DB_INSERT_FLIGHT_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
-		SEM_POST_N_CLOSE(sem);
-		SEM_POST_N_CLOSE(sem_2);
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 		return smsg;
 	}
@@ -112,18 +134,12 @@ simpleMessage * insertFlight_DB(Flight * f, sqlite3 * db){
   	bindFlightInsertData(f,stmt);
 	rc = sqlite3_step(stmt); 
 	if (rc != SQLITE_DONE) {
-		SEM_POST_N_CLOSE(sem);
-		SEM_POST_N_CLOSE(sem_2);
 	    setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 	    return smsg;
 	}
 
       
 	rc = sqlite3_finalize(stmt);
-	
-	SEM_POST_N_CLOSE(sem);
-	SEM_POST_N_CLOSE(sem_2);
-
 	if(rc != SQLITE_OK){
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 		return smsg;
@@ -143,8 +159,20 @@ void bindFlightInsertData(Flight * f, sqlite3_stmt * stmt){
 }
 
 simpleMessage * deleteFlight_DB(const char * flightCode, sqlite3 * db){
-	int rc;
+	simpleMessage * smsg;
 	sem_t * sem;
+
+	sem = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_); // plane semaphore not necessary when deleting
+	sem_wait(sem);
+
+	smsg = deleteFlight_DB_wo_Semaphores(flightCode,db);
+
+	SEM_POST_N_CLOSE(sem);
+	return smsg;
+}
+
+simpleMessage * deleteFlight_DB_wo_Semaphores(const char * flightCode, sqlite3 * db){
+	int rc;
 	sqlite3_stmt * stmt;
 	simpleMessage * smsg;
 
@@ -152,12 +180,8 @@ simpleMessage * deleteFlight_DB(const char * flightCode, sqlite3 * db){
 	if(smsg == NULL)
 		return NULL;
 	
-	sem = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_); // plane semaphore not necessary when deleting
-	sem_wait(sem);
-
 	rc = sqlite3_prepare_v2(db, DB_DELETE_FLIGHT_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
-		SEM_POST_N_CLOSE(sem);
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 		return smsg;
 	}
@@ -166,15 +190,12 @@ simpleMessage * deleteFlight_DB(const char * flightCode, sqlite3 * db){
   	bindFlightDeleteData(flightCode, stmt);
 	rc = sqlite3_step(stmt); 
 	if (rc != SQLITE_DONE) {
-		SEM_POST_N_CLOSE(sem);
 	    setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 	    return smsg;
 	}
 
       
 	rc = sqlite3_finalize(stmt);
-	SEM_POST_N_CLOSE(sem);
-
 	if(rc != SQLITE_OK){
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 		return smsg;
@@ -189,8 +210,20 @@ void bindFlightDeleteData(const char * fCode, sqlite3_stmt * stmt){
 }
 
 Planes * getPlanes_DB(sqlite3 * db){
-	int rc;
+	Planes * planes;
 	sem_t * sem;
+
+	sem = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
+	sem_wait(sem);
+
+	planes = getPlanes_DB_wo_Semaphores(db);
+
+	SEM_POST_N_CLOSE(sem);
+	return planes;
+}
+
+Planes * getPlanes_DB_wo_Semaphores(sqlite3 * db){
+	int rc;
 	sqlite3_stmt * stmt;
 	Planes * planes;
    	Plane p;
@@ -199,12 +232,9 @@ Planes * getPlanes_DB(sqlite3 * db){
 	if(planes == NULL)
 		return NULL;
 
-	sem = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
-	sem_wait(sem);
-
 	rc = sqlite3_prepare_v2(db, DB_GET_PLANES_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
-		SEM_POST_N_CLOSE(sem);
+		
 		freePlanes(planes);
 		return NULL;
 	}
@@ -212,7 +242,6 @@ Planes * getPlanes_DB(sqlite3 * db){
 	while((rc = sqlite3_step(stmt)) == SQLITE_ROW){
 		setPlaneData(&p,stmt);
 		if(addPlane(planes,&p) != EXPAND_OK){
-			SEM_POST_N_CLOSE(sem);
 			freePlanes(planes);
 			return NULL;
 		}
@@ -220,7 +249,6 @@ Planes * getPlanes_DB(sqlite3 * db){
 
       
 	rc = sqlite3_finalize(stmt);
-	SEM_POST_N_CLOSE(sem);
 
 	if(rc != SQLITE_OK){
 		freePlanes(planes);
@@ -236,7 +264,6 @@ void setPlaneData(Plane * p, sqlite3_stmt * stmt){
 	p->columns = (int) sqlite3_column_int(stmt, P_COLUMNS_COLUMN);
 }
 
-/* returns the plane from a flight WARNING (use semaphores when calling this function) */
 Plane * getPlaneFromFlight_DB_wo_Semaphores(const char * flightCode, sqlite3 * db){
 	int rc;
 	sqlite3_stmt * stmt;
@@ -275,8 +302,20 @@ void bindGetPlaneData(const char * flightCode, sqlite3_stmt * stmt){
 }
 
 simpleMessage * insertPlane_DB(Plane * p, sqlite3 * db){
-	int rc;
+	simpleMessage * smsg;
 	sem_t * sem;
+
+	sem = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
+	sem_wait(sem);
+
+	smsg = insertPlane_DB_wo_Semaphores(p,db);
+
+	SEM_POST_N_CLOSE(sem);
+	return smsg;
+}
+
+simpleMessage * insertPlane_DB_wo_Semaphores(Plane * p, sqlite3 * db){
+	int rc;
 	sqlite3_stmt * stmt;
 	simpleMessage * smsg;
 
@@ -284,12 +323,9 @@ simpleMessage * insertPlane_DB(Plane * p, sqlite3 * db){
 	if(smsg == NULL)
 		return NULL;
 
-	sem = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
-	sem_wait(sem);
-
 	rc = sqlite3_prepare_v2(db, DB_INSERT_PLANE_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
-		SEM_POST_N_CLOSE(sem);
+		
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 		return smsg;
 	}
@@ -298,14 +334,12 @@ simpleMessage * insertPlane_DB(Plane * p, sqlite3 * db){
   	bindPlaneInsertData(p,stmt);
 	rc = sqlite3_step(stmt); 
 	if (rc != SQLITE_DONE) {
-		SEM_POST_N_CLOSE(sem);
 	    setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 	    return smsg;
 	}
 
       
 	rc = sqlite3_finalize(stmt);
-	SEM_POST_N_CLOSE(sem);
 
 	if(rc != SQLITE_OK){
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
@@ -323,8 +357,19 @@ void bindPlaneInsertData(Plane * p, sqlite3_stmt * stmt){
 }
 
 simpleMessage * deletePlane_DB(const char * planeModel, sqlite3 * db){
-	int rc;
+	simpleMessage * smsg;
 	sem_t * sem;
+	sem = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
+	sem_wait(sem);
+
+	smsg = deletePlane_DB_wo_Semaphores(planeModel, db);
+
+	SEM_POST_N_CLOSE(sem);
+	return smsg;
+}
+
+simpleMessage * deletePlane_DB_wo_Semaphores(const char * planeModel, sqlite3 * db){
+	int rc;
 	sqlite3_stmt * stmt;
 	simpleMessage * smsg;
 
@@ -332,12 +377,8 @@ simpleMessage * deletePlane_DB(const char * planeModel, sqlite3 * db){
 	if(smsg == NULL)
 		return NULL;
 
-	sem = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
-	sem_wait(sem);
-
 	rc = sqlite3_prepare_v2(db, DB_DELETE_PLANE_QUERY, -1, &stmt, 0);
 	if(rc != SQLITE_OK){
-		SEM_POST_N_CLOSE(sem);
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 		return smsg;
 	}
@@ -346,14 +387,12 @@ simpleMessage * deletePlane_DB(const char * planeModel, sqlite3 * db){
   	bindPlaneDeleteData(planeModel, stmt);
 	rc = sqlite3_step(stmt); 
 	if (rc != SQLITE_DONE) {
-		SEM_POST_N_CLOSE(sem);
 	    setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 	    return smsg;
 	}
 
       
 	rc = sqlite3_finalize(stmt);
-	SEM_POST_N_CLOSE(sem);
 
 	if(rc != SQLITE_OK){
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
@@ -367,7 +406,7 @@ simpleMessage * deletePlane_DB(const char * planeModel, sqlite3 * db){
 void bindPlaneDeleteData(const char * planeModel, sqlite3_stmt * stmt){
 	sqlite3_bind_text(stmt, 1, planeModel, -1, SQLITE_STATIC); 
 }
-/* warning use this funtion w/ semaphores always!*/
+
 int insertReservation_DB_wo_Semaphores(Reservation * r, sqlite3 * db){
 	int rc;
 	Plane * plane;
@@ -395,6 +434,7 @@ int insertReservation_DB_wo_Semaphores(Reservation * r, sqlite3 * db){
 	return sqlite3_finalize(stmt);
 }
 
+/* Returns TRUE IF Seat is Available, FALSE otherwise*/
 int checkReservation_wo_Semaphores(Reservation * r, sqlite3 *db){
 	int rc,q;
 	int check = FALSE;
@@ -483,6 +523,25 @@ void bindReservationCheckOrDeleteData(const Reservation * r, sqlite3_stmt * stmt
   	sqlite3_bind_int(stmt, R_SEAT_COLUMN_COLUMN+1, r->seatColumn); 
 }
 
+flightReservations * getReservations_DB(const char * flightCode, sqlite3 * db){
+	flightReservations * fres;
+	sem_t * sem, *sem_1, *sem_2;
+
+	sem = openMutexSemaphore(_SEMAPHORE_RESERVATION_NAME_);
+	sem_1 = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_); 
+	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_); 
+	sem_wait(sem_1);//block flight queries
+	sem_wait(sem_2);//block plane queries 
+	sem_wait(sem);
+
+	fres = getReservations_DB_wo_Semaphores(flightCode,db);
+
+	SEM_POST_N_CLOSE(sem_1);
+	SEM_POST_N_CLOSE(sem_2);
+	SEM_POST_N_CLOSE(sem);
+	return fres;
+}
+
 flightReservations * getReservations_DB_wo_Semaphores(const char * flightCode, sqlite3 * db){
 	int rc;
 	flightReservations * reservations;
@@ -524,25 +583,6 @@ flightReservations * getReservations_DB_wo_Semaphores(const char * flightCode, s
 	}
 
 	return reservations;
-}
-
-flightReservations * getReservations_DB(const char * flightCode, sqlite3 * db){
-	flightReservations * fres;
-	sem_t * sem, *sem_1, *sem_2;
-
-	sem = openMutexSemaphore(_SEMAPHORE_RESERVATION_NAME_);
-	sem_1 = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_); 
-	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_); 
-	sem_wait(sem_1);//block flight queries
-	sem_wait(sem_2);//block plane queries 
-	sem_wait(sem);
-
-	fres = getReservations_DB_wo_Semaphores(flightCode,db);
-
-	SEM_POST_N_CLOSE(sem_1);
-	SEM_POST_N_CLOSE(sem_2);
-	SEM_POST_N_CLOSE(sem);
-	return fres;
 }
 
 void bindGetReservation(const char * flightCode, sqlite3_stmt * stmt){

@@ -2,6 +2,10 @@
 #define _CORE_STRUCTS_H_
 #include "constants.h"
 
+//TYPEDEFS 
+typedef unsigned char cmd_id;
+typedef int cmd_int;
+
 typedef struct {
 	char * flightCode;
 	char * origin;
@@ -65,6 +69,13 @@ typedef struct{
 #define MAX_PASSPORTID 10+1
 #define MAX_MESSAGE_LENGTH 1000
 
+//SERVER/CLIENT BYTES
+#define CMD_BYTES sizeof(cmd_id)
+#define CODE_BYTES sizeof(cmd_int)
+#define RESPONSE_TOT_BYTES (CMD_BYTES+ CODE_BYTES)
+#define LENGTH_TOT_BYTES (CMD_BYTES+ CODE_BYTES)
+#define SERVER_MAX_INPUT_LENGTH (MAX_MESSAGE_LENGTH-1)
+
 #define FLIGHT_SERIALIZE_BYTES ((MAX_FLIGHTCODE+MAX_ORIGIN+MAX_DESTINATION+MAX_DEP_DATE+MAX_ARR_DATE+MAX_PLANE_MODEL)*sizeof(char))
 #define PLANE_SERIALIZE_BYTES ((MAX_PLANE_MODEL)*sizeof(char)+(2*sizeof(int)))
 #define RESERVATION_SERIALIZE_BYTES ((MAX_FLIGHTCODE+MAX_PASSPORTID)*sizeof(char)+(2*sizeof(int)))
@@ -72,7 +83,8 @@ typedef struct{
 #define FLIGHT_RESERVATION_SERIALIZE_BYTES (MAX_FLIGHTCODE*sizeof(char)+PLANE_SERIALIZE_BYTES+sizeof(int))
 #define FLIGHTS_SERIALIZE_BYTES (sizeof(int))
 #define PLANES_SERIALIZE_BYTES (sizeof(int))
-#define SIMPLE_CMD_SERIALIZE_BYTES (sizeof(cmd_id) + sizeof(cmd_int))
-#define SIMPLE_MSG_SERIALIZE_BYTES (sizeof(cmd_id) + MAX_MESSAGE_LENGTH*sizeof(char))
+#define SIMPLE_CMD_SERIALIZE_BYTES (CMD_BYTES + CODE_BYTES)
+#define SIMPLE_MSG_SERIALIZE_BYTES (CMD_BYTES + MAX_MESSAGE_LENGTH*sizeof(char))
+
 #endif
  

@@ -46,6 +46,7 @@ int serverHandler(int socket){
 
 	return con_status;
 }
+
 int getHelloFromServer(int socket, int isAdmin){
 	int status, bytes;
 	char * bytes_aux, data[SERVER_MAX_INPUT_LENGTH];
@@ -84,6 +85,7 @@ int getHelloFromServer(int socket, int isAdmin){
 	
 	return HELLO_OK;
 }
+
 int getDataFromServer(int socket, char * buffer, int max_bytes, int * data_size){
 	int read_size;
 

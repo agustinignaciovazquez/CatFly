@@ -1,7 +1,7 @@
 #ifndef _COMMANDPARSER_H_
 #define _COMMANDPARSER_H_
 
-#include "constants.h"
+#include "coreStructs.h"
 
 #define SQL_ERROR -1
 #define PARSE_ERROR -2
