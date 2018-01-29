@@ -35,6 +35,13 @@ void setSimpleMessageSettings(simpleMessage * sMsgs, cmd_id cmd,const char * msg
 	sMsgs->command = cmd;
 }
 
+void setSimpleMessageSettings_w_bytes(simpleMessage * sMsgs, cmd_id cmd, const char * msg, int msg_bytes){
+	char * messageStr = sMsgs->msg;
+	copyBytes(messageStr, msg, msg_bytes);
+	messageStr[msg_bytes] = '\0';
+	sMsgs->command = cmd;
+}
+
 Flight * expandFlight(Flight * fl){
 	int isArray = (fl == NULL)? FALSE : TRUE;
 

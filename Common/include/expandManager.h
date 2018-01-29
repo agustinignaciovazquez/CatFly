@@ -26,5 +26,6 @@ void freeFlightReservations(flightReservations * frs);
 void freeExpandedSimpleMessage(simpleMessage * sMgs);
 void setFlightReservationsSettings(flightReservations * frs, const char * flightCode, const Plane * pl);
 void setSimpleMessageSettings(simpleMessage * sMsgs, cmd_id cmd,const char * msg);
+void setSimpleMessageSettings_w_bytes(simpleMessage * sMsgs, cmd_id cmd, const char * msg, int msg_bytes);
 #endif
  

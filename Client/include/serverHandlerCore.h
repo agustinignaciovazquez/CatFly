@@ -2,6 +2,7 @@
 #define _SHANDLER_H_
 
 #include <unistd.h>    //write
+#include "coreStructs.h"
 
 #define HELLO_ERROR -4
 #define HELLO_OK 4
@@ -14,5 +15,8 @@
 #define SERVER_DISCONNECTED 3
 
 int serverHandler(int socket);
+int sendSimpleCmd(int socket, simpleCommand * simpleCmd);
+int sendSimpleMsg(int socket, simpleMessage * simpleMsg);
+int getDataAndLengthFromServer(int socket, char * * data, int * bytes);
 
 #endif
