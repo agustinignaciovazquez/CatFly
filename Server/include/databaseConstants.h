@@ -27,35 +27,35 @@
 #define DB_ENABLE_FK "PRAGMA foreign_keys = ON;"
 //use https://www.freeformatter.com/java-dotnet-escape.html#ad-output to escape the string
 
-#define DB_CREATE_FLIGHTS_QUERY "CREATE TABLE flights(\
+#define DB_CREATE_FLIGHTS_QUERY "CREATE TABLE IF NOT EXISTS flights(\
 flightCode TEXT PRIMARY KEY NOT NULL CHECK(LENGTH(\"flightCode\") = 4),\
 origin TEXT NOT NULL CHECK(LENGTH(\"origin\") = 3),\
 destination TEXT NOT NULL CHECK(LENGTH(\"destination\") = 3),\
 departureDate TEXT NOT NULL CHECK(LENGTH(\"departureDate\") = 16),\
 arrivalDate TEXT NOT NULL CHECK(LENGTH(\"arrivalDate\") = 16),\
 planeModel TEXT NOT NULL CHECK(LENGTH(\"planeModel\") >= 3 AND LENGTH(\"planeModel\") <= 10),\
-FOREIGN KEY (planeModel) REFERENCES planes(model));" 
+FOREIGN KEY (planeModel) REFERENCES planes(model) ON DELETE CASCADE ON UPDATE CASCADE);" 
 
-#define DB_CREATE_PLANES_QUERY "CREATE TABLE planes(\
+#define DB_CREATE_PLANES_QUERY "CREATE TABLE IF NOT EXISTS planes(\
 model TEXT PRIMARY KEY NOT NULL CHECK(LENGTH(\"model\") <= 10),\
 rows INT NOT NULL CHECK(rows > 0 AND rows < 99),\
 columns INT NOT NULL CHECK(columns > 0 AND columns < 99));"
 
-#define DB_CREATE_RESERVATIONS_QUERY "CREATE TABLE reservations(\
+#define DB_CREATE_RESERVATIONS_QUERY "CREATE TABLE IF NOT EXISTS reservations(\
 flightCode TEXT NOT NULL CHECK(LENGTH(\"flightCode\") = 4),\
 seatRow INT NOT NULL CHECK(seatRow >= 0 AND seatRow < 99),\
 seatColumn INT NOT NULL CHECK(seatColumn >= 0 AND seatColumn < 99),\
 passportID TEXT NOT NULL CHECK(LENGTH(\"passportID\") >= 7 AND LENGTH(\"passportID\") <= 10),\
 PRIMARY KEY (flightCode,seatRow,seatColumn),\
-FOREIGN KEY (flightCode) REFERENCES flights(flightCode));"
+FOREIGN KEY (flightCode) REFERENCES flights(flightCode) ON DELETE CASCADE ON UPDATE CASCADE );"
 
-#define DB_CREATE_CANCELATIONS_QUERY "CREATE TABLE cancelations(\
+#define DB_CREATE_CANCELATIONS_QUERY "CREATE TABLE IF NOT EXISTS cancelations(\
 id INTEGER PRIMARY KEY AUTOINCREMENT,\
 flightCode TEXT NOT NULL CHECK(LENGTH(\"flightCode\") = 4),\
 seatRow INT NOT NULL CHECK(seatRow >= 0 AND seatRow < 99),\
 seatColumn INT NOT NULL CHECK(seatColumn >= 0 AND seatColumn < 99),\
 passportID TEXT NOT NULL CHECK(LENGTH(\"passportID\") >= 7 AND LENGTH(\"passportID\") <= 10),\
-FOREIGN KEY (flightCode) REFERENCES flights(flightCode));"
+FOREIGN KEY (flightCode) REFERENCES flights(flightCode) ON DELETE CASCADE ON UPDATE CASCADE);"
 
 #define DB_INSERT_FLIGHT_QUERY "INSERT INTO flights VALUES(?,?,?,?,?,?);"
 #define DB_INSERT_PLANE_QUERY "INSERT INTO planes VALUES(?,?,?);"
@@ -71,6 +71,7 @@ FOREIGN KEY (flightCode) REFERENCES flights(flightCode));"
 #define DB_GET_PLANES_QUERY "SELECT * FROM planes;"
 #define DB_GET_PLANE_FROM_FLIGHT_CODE_QUERY "SELECT planes.* FROM planes,flights WHERE flights.flightCode = ?;"
 #define DB_GET_RESERVATIONS_QUERY "SELECT * FROM reservations WHERE flightCode = ?;" 
+#define DB_GET_USER_RESERVATIONS_QUERY "SELECT * FROM reservations WHERE passportID = ?;" 
 #define DB_GET_CANCELATIONS_QUERY "SELECT * FROM cancelations WHERE flightCode = ?;"
 
 #define DB_CHECK_RESERVATION_QUERY "SELECT count(*) FROM reservations WHERE flightCode = ? AND seatRow = ? AND seatColumn = ?;"

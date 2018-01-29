@@ -162,6 +162,45 @@ int deserializePlanes(const char * data, int size, Planes * pls){
 	return (aux - data);
 }
 
+int deserializeReservations(const char * data, int size, Reservations * res){
+	const char * aux;
+	Reservation * r;
+	int i, qRes, bytesDes, addFlag, auxSize;
+	
+	aux = data;
+	auxSize = size;
+	aux += copyBytes(&qRes, (void *) aux, sizeof(res->qReservations));
+
+	r = expandReservation(NULL);
+	if(r == NULL)
+		return DESERIALIZE_ERROR;
+
+	for(i = 0; i < qRes;i++){
+		bytesDes = deserializeReservation(aux, auxSize, r);
+		if(bytesDes == DESERIALIZE_ERROR){
+			freeExpandedReservation(r, FALSE);
+			return DESERIALIZE_ERROR;
+		}
+		
+		addFlag = addUserReservation(res, r);
+		if(addFlag != EXPAND_OK){
+			freeExpandedReservation(r, FALSE);
+			return DESERIALIZE_ERROR;
+		}
+
+		aux += bytesDes;
+		auxSize -= bytesDes;
+		
+	}
+
+	freeExpandedReservation(r, FALSE);
+
+	if(size < (aux - data))
+		return DESERIALIZE_ERROR;
+
+	return (aux - data);
+}
+
 int deserializeReservation(const char * data, int size, Reservation * res){
 	const char * aux;
 	if(res == NULL)
@@ -213,7 +252,7 @@ int deserializeFlightReservations(const char * data, int size, flightReservation
 		if(bytesDes == DESERIALIZE_ERROR)
 			return DESERIALIZE_ERROR;
 				
-		addFlag = addReservation(res, &resMin);
+		addFlag = addFlightReservation(res, &resMin);
 		if(addFlag != EXPAND_OK)
 			return DESERIALIZE_ERROR;
 		

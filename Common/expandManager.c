@@ -12,6 +12,7 @@
 int expandStr(char * * p, int max);
 void FlightDeepCopy(Flight * dest, const Flight * fl);
 void PlaneDeepCopy(Plane * dest, const Plane * pl);
+void ReservationDeepCopy(Reservation * dest, const Reservation * r);
 void ResMinDeepCopy(ReservationMinimal * dest, const ReservationMinimal * rs);
 void setFlightReserSettings(flightReservations * frs, const char * flightCode, Plane * pl);
 
@@ -199,6 +200,45 @@ Reservation * expandReservation(Reservation * res){
 	return res;
 }
 
+Reservations * expandReservations(){
+	Reservations * res;
+
+	res = malloc(sizeof(Reservations));
+	if(res == NULL)
+		return NULL;
+
+	res->qReservations = 0;
+	res->reservations = NULL;
+	return res;
+}
+
+int addUserReservation(Reservations * expanded, const Reservation * r){
+	int q = expanded->qReservations;
+	Reservation *aux = expanded->reservations;
+
+	if((q % BLOCK) == 0){
+		aux = realloc(expanded->reservations, (q+BLOCK)*sizeof(Reservation));
+		if(aux == NULL){
+			freeUserReservations(expanded);
+			return EXPAND_ERROR;
+		}
+		expanded->reservations = aux;
+	}
+	if(expandReservation((expanded->reservations)+q) == NULL)
+		return EXPAND_ERROR;
+
+	ReservationDeepCopy(((expanded->reservations)+q), r);
+	expanded->qReservations += 1;
+	return EXPAND_OK;
+}
+
+void ReservationDeepCopy(Reservation * dest, const Reservation * r){
+	copyStr(dest->flightCode, r->flightCode, MAX_FLIGHTCODE);
+	dest->seatRow = r->seatRow;
+	dest->seatColumn = r->seatColumn;
+	copyStr(dest->passportID, r->passportID, MAX_PASSPORTID);
+}
+
 //DEPRECATED
 ReservationMinimal * expandReservationMinimal(ReservationMinimal * res){
 	if(res == NULL)
@@ -242,7 +282,7 @@ void setFlightReservationsSettings(flightReservations * frs, const char * flight
 	PlaneDeepCopy((frs->planeSeats), pl);
 }
 
-int addReservation(flightReservations * expanded, const ReservationMinimal * rs){
+int addFlightReservation(flightReservations * expanded, const ReservationMinimal * rs){
 	int q = expanded->qReservations;
 	ReservationMinimal *aux = expanded->reservations;
 
@@ -327,6 +367,25 @@ void freePlanes(Planes * pls){
 	}
 	free(pls->planes);
 	free(pls);
+}
+
+void freeUserReservations(Reservations * res){
+	int i,q;
+	Reservation * r;
+	if(res == NULL)
+		return;
+	q = res->qReservations;
+
+	#ifdef DEBUG
+		fprintf(stdout, "Free array reservations in (%p)\n", res->reservations);
+		fprintf(stdout, "Free struct in (%p)\n", res);
+	#endif
+	for(i = 0; i < q;i++){
+		r = (res->reservations)+i;
+		freeExpandedReservation(r, TRUE);
+	}
+	free(res->reservations);
+	free(res);
 }
 
 void freeExpandedReservation(Reservation * res, int isArray){

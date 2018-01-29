@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+int copyReservationsArr(char * ser, const Reservation * rs, int size);
 int copyReservationsMinArr(char * ser, const ReservationMinimal * res, int size);
 int copyFlightsArr(char * ser, const Flight * fl, int size);
 int copyPlanesArr(char * ser, const Plane * pl, int size);
@@ -70,6 +70,24 @@ char * serializePlane(Plane * pl, int * size){
 	//Copy the struct
 	*size = copyPlane(s,pl);
 
+	return s;
+}
+
+char * serializeUserReservations(Reservations * res, int * size){
+	char *s,*aux;
+	int totalBytes;
+
+	totalBytes = RESERVATIONS_SERIALIZE_BYTES + (res->qReservations)*RESERVATION_SERIALIZE_BYTES;
+	s = malloc(totalBytes);
+	if(s == NULL)
+		return s;
+
+	//copythestruct
+	aux = s;
+	aux += copyBytes(aux, (void *)&(res->qReservations), sizeof(res->qReservations));
+	aux += copyReservationsArr(aux, res->reservations, res->qReservations);
+
+	*size = (aux -s);
 	return s;
 }
 
@@ -174,6 +192,17 @@ int copyFlight(char * ser, const Flight * fl){
 	aux += copyStr(aux, fl->planeModel, MAX_PLANE_MODEL);
 
 	return (aux - ser);
+}
+
+int copyReservationsArr(char * ser, const Reservation * rs, int size){
+	int i;
+	char * aux = ser;
+
+	for(i = 0; i < size;i++){
+		aux += copyReservation(aux, &(rs[i]));
+	}
+
+	return (aux - ser); 
 }
 
 int copyReservationsMinArr(char * ser, const ReservationMinimal * res, int size){

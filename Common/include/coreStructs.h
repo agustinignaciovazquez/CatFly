@@ -39,6 +39,11 @@ typedef struct{
 }Reservation;
 
 typedef struct{
+	int qReservations;
+	Reservation * reservations;
+}Reservations;
+
+typedef struct{
 	int seatRow;
 	int seatColumn;
 }ReservationMinimal;
@@ -83,6 +88,7 @@ typedef struct{
 #define FLIGHT_RESERVATION_SERIALIZE_BYTES (MAX_FLIGHTCODE*sizeof(char)+PLANE_SERIALIZE_BYTES+sizeof(int))
 #define FLIGHTS_SERIALIZE_BYTES (sizeof(int))
 #define PLANES_SERIALIZE_BYTES (sizeof(int))
+#define RESERVATIONS_SERIALIZE_BYTES (sizeof(int))
 #define SIMPLE_CMD_SERIALIZE_BYTES (CMD_BYTES + CODE_BYTES)
 #define SIMPLE_MSG_SERIALIZE_BYTES (CMD_BYTES + MAX_MESSAGE_LENGTH*sizeof(char))
 

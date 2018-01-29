@@ -9,13 +9,13 @@
 #include <string.h>  
 
 int getAllFlights(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
-int getFlightCancelations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
+int getFlightReservations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int insertFlight(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int deleteFlight(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int getPlanes(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int insertPlane(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int deletePlane(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
-int getReservations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
+int getUserReservations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int insertReservation(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int deleteReservation(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int disconnectClient(char * * response, int * response_bytes, sqlite3 * db);
@@ -60,8 +60,8 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 		case GET_FLIGHTS_CMD:
 			r = getAllFlights(command, size, response, response_bytes, db);
 			break;
-		case GET_FLIGHT_RESERVATION_CMD:
-			r = getReservations(command, size, response, response_bytes, db);
+		case GET_FLIGHT_RESERVATIONS_CMD:
+			r = getFlightReservations(command, size, response, response_bytes, db);
 			break;
 		case INSERT_FLIGHT_RESERVATION_CMD:
 			r = insertReservation(command, size, response, response_bytes, db);
@@ -91,8 +91,8 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 			case DELETE_PLANE_CMD:
 				r = deletePlane(command, size, response, response_bytes, db);
 				break;
-			case GET_FLIGHT_CANCELATIONS_CMD:
-				r = getFlightCancelations(command, size, response, response_bytes, db);
+			case GET_RESERVATIONS_CMD:
+				r = getUserReservations(command, size, response, response_bytes, db);
 				break;
 		}
 	}
@@ -113,11 +113,28 @@ int getAllFlights(const char * command, int size, char * * response, int * respo
 }
 
  
-int getFlightCancelations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
-	*response_bytes = 20;
-	*response = "flightinfo";
-	*response_bytes = strlen(*response);
-	return RESPONSE_OK;
+int getUserReservations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
+	Reservations * res;
+	Reservation * r;
+
+	r = expandReservation(NULL);
+	if(r == NULL)
+		return EXPAND_ERROR;
+	
+	if(deserializeReservation(command, size, r) == DESERIALIZE_ERROR){
+		freeExpandedReservation(r, FALSE);
+		return PARSE_ERROR;
+	}
+
+	res = getUserReservations_DB(r->passportID,db);
+	freeExpandedReservation(r, FALSE);
+	if(res == NULL)
+		return SQL_ERROR;
+	
+	*response = serializeUserReservations(res, response_bytes);
+	freeUserReservations(res);
+
+	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
 }
 
 int insertFlight(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
@@ -152,7 +169,6 @@ int deleteFlight(const char * command, int size, char * * response, int * respon
 	if(f == NULL)
 		return EXPAND_ERROR;
 	
-
 	if(deserializeFlight(command, size, f) == DESERIALIZE_ERROR){
 		freeExpandedFlight(f, FALSE);
 		return PARSE_ERROR;
@@ -231,7 +247,7 @@ int deletePlane(const char * command, int size, char * * response, int * respons
 	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
 }
 
-int getReservations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
+int getFlightReservations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
 	flightReservations * frs;
 	Flight * f;
 
@@ -245,7 +261,7 @@ int getReservations(const char * command, int size, char * * response, int * res
 		return PARSE_ERROR;
 	}
 
-	frs = getReservations_DB(f->flightCode,db);
+	frs = getFlightReservations_DB(f->flightCode,db);
 	freeExpandedFlight(f, FALSE);
 	if(frs == NULL)
 		return SQL_ERROR;

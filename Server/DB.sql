@@ -6,7 +6,7 @@ CREATE TABLE flights(
 	departureDate TEXT NOT NULL CHECK(LENGTH("departureDate") = 16),
 	arrivalDate TEXT NOT NULL CHECK(LENGTH("arrivalDate") = 16),
 	planeModel TEXT NOT NULL CHECK(LENGTH("planeModel") >= 3 AND LENGTH("planeModel") <= 10),
-	FOREIGN KEY (planeModel) REFERENCES planes(model)
+	FOREIGN KEY (planeModel) REFERENCES planes(model) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE planes(
 	model TEXT PRIMARY KEY NOT NULL CHECK(LENGTH("model") <= 10),
@@ -19,7 +19,7 @@ CREATE TABLE reservations(
 	seatColumn INT NOT NULL CHECK(seatColumn > 0 AND seatColumn < 99),
 	passportID TEXT NOT NULL CHECK(LENGTH("passportID") >= 7 AND LENGTH("passportID") <= 10),
 	PRIMARY KEY (flightCode,seatRow,seatColumn),
-	FOREIGN KEY (flightCode) REFERENCES flights(flightCode)
+	FOREIGN KEY (flightCode) REFERENCES flights(flightCode) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE cancelations(
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,5 +27,5 @@ CREATE TABLE cancelations(
 	seatRow INT NOT NULL CHECK(seatRow > 0 AND seatRow < 99),
 	seatColumn INT NOT NULL CHECK(seatColumn > 0 AND seatColumn < 99),
 	passportID TEXT NOT NULL CHECK(LENGTH("passportID") >= 7 AND LENGTH("passportID") <= 10),
-	FOREIGN KEY (flightCode) REFERENCES flights(flightCode)
+	FOREIGN KEY (flightCode) REFERENCES flights(flightCode) ON DELETE CASCADE ON UPDATE CASCADE
 );

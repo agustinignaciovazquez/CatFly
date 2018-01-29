@@ -4,6 +4,25 @@
 #include <stdlib.h>
 #include <string.h> 
 int numPlaces (int n);
+
+void printSimpleMenu(){
+  fprintf(stdout,"Flight On-Line \n");
+  fprintf(stdout,"Please select one option: \n");
+  fprintf(stdout,"1) Show all flights\n");
+  fprintf(stdout,"2) Reserve a seat\n");
+  fprintf(stdout,"3) Show my flights\n");
+}
+
+void printAdminMenu(){
+  fprintf(stdout,"Flight On-Line System Administration\n");
+  fprintf(stdout,"Please select one option: \n");
+  fprintf(stdout,"1) Show all flights\n");
+  fprintf(stdout,"2) Add new flight\n");
+  fprintf(stdout,"3) Reserve a seat\n");
+  fprintf(stdout,"4) Show all planes models\n");
+  fprintf(stdout,"5) Add new plane model\n");
+}
+
 void printFlight(Flight * fl){
   fprintf(stdout,"Flight Code: %s\n", fl->flightCode);
   fprintf(stdout,"Origin: %s\n", fl->origin);
@@ -53,7 +72,7 @@ void printReservations(char * * reservations, int rows, int columns){
 
     printf("ROWSxCOLUMNS \n\t");
     for(j = 0; j < columns; j++){
-      printf(" %d", (j+1));
+      printf("  %d", (j+1));
     }
     printf("\n\n");
 
@@ -64,7 +83,7 @@ void printReservations(char * * reservations, int rows, int columns){
         for(s = 0; s < spaces;s++){
           putchar(' ');
         }
-        printf("%c", reservations[i][j]+'_');
+        printf("%c|", (reservations[i][j] != OCCUPIED_SEAT)? SEAT_AVAILABLE_DISPLAY : SEAT_OCCUPIED_DISPLAY);
       }
       printf("\n");
     }

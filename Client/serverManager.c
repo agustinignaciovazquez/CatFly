@@ -69,13 +69,26 @@ simpleMessage * insertFlight_Server(Flight * f, int socket){
 	return response;
 }
 
-simpleMessage * deleteFlight_Server(const char * flightCode, int socket){
-	int status, bytes;
-	char * read_buffer;
-	simpleMessage  request = {.command = DELETE_FLIGHT_CMD, .msg = (char *)flightCode};
-	simpleMessage * response;
+simpleMessage * deleteFlight_Server(Flight * f, int socket){
+	int status, bytes,ser_bytes;
+	char * serialized, * read_buffer;
+	simpleMessage  * request, * response;
 
-	status = sendSimpleMsg(socket, &request);
+	serialized = serializeFlight(f, &ser_bytes);
+	if(serialized == NULL)
+		return NULL;
+
+	request = expandSimpleMessage();
+	if(request == NULL){
+		freeSerialized(serialized);
+		return NULL;
+	}
+
+	setSimpleMessageSettings_w_bytes(request, DELETE_FLIGHT_CMD, serialized, ser_bytes);
+	freeSerialized(serialized);
+
+	status = sendSimpleMsg(socket, request);
+	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;
 
@@ -154,13 +167,26 @@ simpleMessage * insertPlane_Server(Plane * p, int socket){
 	return response;
 }
 
-simpleMessage * deletePlane_Server(const char * planeModel, int socket){
-	int status, bytes;
-	char * read_buffer;
-	simpleMessage  request = {.command = DELETE_PLANE_CMD, .msg = (char *)planeModel};
-	simpleMessage * response;
+simpleMessage * deletePlane_Server(Plane * p, int socket){
+	int status, bytes,ser_bytes;
+	char * serialized, * read_buffer;
+	simpleMessage  * request, * response;
 
-	status = sendSimpleMsg(socket, &request);
+	serialized = serializePlane(p, &ser_bytes);
+	if(serialized == NULL)
+		return NULL;
+
+	request = expandSimpleMessage();
+	if(request == NULL){
+		freeSerialized(serialized);
+		return NULL;
+	}
+
+	setSimpleMessageSettings_w_bytes(request, DELETE_PLANE_CMD, serialized, ser_bytes);
+	freeSerialized(serialized);
+
+	status = sendSimpleMsg(socket, request);
+	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;
 
@@ -178,13 +204,27 @@ simpleMessage * deletePlane_Server(const char * planeModel, int socket){
 	return response;
 }
 
-flightReservations * getReservations_Server(const char * flightCode, int socket){
-	int status, bytes;
-	char * read_buffer;
-	simpleMessage  request = {.command = GET_FLIGHT_RESERVATION_CMD, .msg = (char *)flightCode};
+flightReservations * getReservations_Server(Flight * f, int socket){
+	int status, bytes, ser_bytes;
+	char * serialized,* read_buffer;
+	simpleMessage  * request;
 	flightReservations * response;
 
-	status = sendSimpleMsg(socket, &request);
+	serialized = serializeFlight(f, &ser_bytes);
+	if(serialized == NULL)
+		return NULL;
+
+	request = expandSimpleMessage();
+	if(request == NULL){
+		freeSerialized(serialized);
+		return NULL;
+	}
+
+	setSimpleMessageSettings_w_bytes(request, INSERT_FLIGHT_CMD, serialized, ser_bytes);
+	freeSerialized(serialized);
+
+	status = sendSimpleMsg(socket, request);
+	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;
 

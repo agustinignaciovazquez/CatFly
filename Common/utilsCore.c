@@ -21,6 +21,36 @@ int copyBytes(void * dest, const void * data, int bytes){
 	return bytes;
 }
 
+char * * createReservationsMatrix(flightReservations * fres){
+    int i,q, row, column, maxRow, maxColumn;
+    Plane * p;
+    ReservationMinimal *r;
+    char * * res;
+
+    q = fres->qReservations;
+    r = fres->reservations;
+    p = fres->planeSeats;
+    maxRow = p->rows;
+    maxColumn = p->columns;
+    
+    res = dinamicMatrix(maxRow, maxColumn);
+    if(res == NULL)
+        return NULL;
+
+    for(i = 0; i<q;i++){
+        row = (r[i]).seatRow;
+        column = (r[i]).seatColumn;
+        if(row > maxRow || column > maxRow){
+            freeMatrix(res, maxRow);
+            return NULL;
+        }
+
+        res[row][column] = OCCUPIED_SEAT;
+    }
+
+    return res;
+}
+
 char * * dinamicMatrix(unsigned int rows, unsigned int columns){
     int i;
     char * * matrix;

@@ -213,9 +213,9 @@ void testSerialFlightRes(){
   ReservationMinimal r2 = {.seatRow = 33, .seatColumn = 5};
   ReservationMinimal r3 = {.seatRow = 37, .seatColumn = 3};
 
-  addReservation(fls, &r1);
-  addReservation(fls, &r2);
-  addReservation(fls, &r3);
+  addFlightReservation(fls, &r1);
+  addFlightReservation(fls, &r2);
+  addFlightReservation(fls, &r3);
   setFlightReservationsSettings(fls, "AA33", &p1);
   bytes_aux = serializeFlightReservations(fls, &bytes_size);
   printf("SERIALIZE DONE TOT SIZE:  %d\n ORIGINAL: \n", bytes_size);

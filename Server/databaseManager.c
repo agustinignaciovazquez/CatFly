@@ -18,7 +18,8 @@ simpleMessage * deleteFlight_DB_wo_Semaphores(const char * flightCode, sqlite3 *
 Planes * getPlanes_DB_wo_Semaphores(sqlite3 * db);
 simpleMessage * insertPlane_DB_wo_Semaphores(Plane * p, sqlite3 * db);
 simpleMessage * deletePlane_DB_wo_Semaphores(const char * planeModel, sqlite3 * db);
-flightReservations * getReservations_DB_wo_Semaphores(const char * flightCode, sqlite3 * db);
+flightReservations * getFlightReservations_DB_wo_Semaphores(const char * flightCode, sqlite3 * db);
+Reservations * getUserReservations_DB_wo_Semaphores(const char * passportID, sqlite3 * db);
 int insertReservation_DB_wo_Semaphores(Reservation * r, sqlite3 * db);
 int checkReservation_wo_Semaphores(Reservation * r, sqlite3 *db);
 int deleteReservation_DB_wo_Semaphores(Reservation * r, sqlite3 * db);
@@ -26,10 +27,12 @@ int insertCancellation_DB_wo_Semaphores(Reservation * r, sqlite3 * db);
 int checkCancellation_wo_Semaphores(Reservation * r, sqlite3 *db);
 
 int isValidSeat(Plane * plane, Reservation * res);
+void setPlaneData(Plane * p, sqlite3_stmt * stmt);
 void setFlightData(Flight * f, sqlite3_stmt * stmt);
+void setUserReservationData(Reservation * rm, sqlite3_stmt * stmt);
+void setFlightReservationData(ReservationMinimal * rm, sqlite3_stmt * stmt);
 void bindFlightInsertData(Flight * f, sqlite3_stmt * stmt);
 void bindFlightDeleteData(const char * fCode, sqlite3_stmt * stmt);
-void setPlaneData(Plane * p, sqlite3_stmt * stmt);
 void bindGetPlaneData(const char * pCode, sqlite3_stmt * stmt);
 void bindPlaneInsertData(Plane * p, sqlite3_stmt * stmt);
 void bindPlaneDeleteData(const char * planeModel, sqlite3_stmt * stmt);
@@ -37,23 +40,12 @@ void bindFlightDeleteData(const char * planeModel, sqlite3_stmt * stmt);
 void bindReservationInsertData(const Reservation * r, sqlite3_stmt * stmt);
 void bindReservationCheckData(const Reservation * r, sqlite3_stmt * stmt);
 void bindReservationData(const Reservation * r, sqlite3_stmt * stmt);
-void bindGetReservation(const char * flightCode, sqlite3_stmt * stmt);
-void setReservationData(ReservationMinimal * rm, sqlite3_stmt * stmt);
+void bindGetFlightReservation(const char * flightCode, sqlite3_stmt * stmt);
+void bindGetUserReservation(const char * passportID, sqlite3_stmt * stmt);
+
 
 Flights * getFlights_DB(sqlite3 * db){
-	Flights * fls;
-	sem_t * sem, * sem_2;
-
-	sem = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_);
- 	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
-	sem_wait(sem);
-	sem_wait(sem_2);//block planes queries
-
-	fls = getFlights_DB_wo_Semaphores(db);
-
-	SEM_POST_N_CLOSE(sem);
-	SEM_POST_N_CLOSE(sem_2);
-	return fls;
+	return getFlights_DB_wo_Semaphores(db);
 }
 
 Flights * getFlights_DB_wo_Semaphores(sqlite3 * db){
@@ -212,16 +204,7 @@ void bindFlightDeleteData(const char * fCode, sqlite3_stmt * stmt){
 }
 
 Planes * getPlanes_DB(sqlite3 * db){
-	Planes * planes;
-	sem_t * sem;
-
-	sem = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
-	sem_wait(sem);
-
-	planes = getPlanes_DB_wo_Semaphores(db);
-
-	SEM_POST_N_CLOSE(sem);
-	return planes;
+	return getPlanes_DB_wo_Semaphores(db);
 }
 
 Planes * getPlanes_DB_wo_Semaphores(sqlite3 * db){
@@ -264,6 +247,56 @@ void setPlaneData(Plane * p, sqlite3_stmt * stmt){
 	p->planeModel = (char *) sqlite3_column_text(stmt, P_MODEL_COLUMN);
 	p->rows = (int) sqlite3_column_int(stmt, P_ROWS_COLUMN);
 	p->columns = (int) sqlite3_column_int(stmt, P_COLUMNS_COLUMN);
+}
+
+Reservations * getUserReservations_DB(const char * passportID, sqlite3 * db){
+	return getUserReservations_DB_wo_Semaphores(passportID,db);
+}
+
+Reservations * getUserReservations_DB_wo_Semaphores(const char * passportID, sqlite3 * db){
+	int rc;
+	Reservations * reservations;
+	Reservation r;
+	sqlite3_stmt * stmt;
+
+	reservations = expandReservations();
+	if(reservations == NULL)
+		return NULL;
+	
+	rc = sqlite3_prepare_v2(db, DB_GET_USER_RESERVATIONS_QUERY, -1, &stmt, 0);
+	if(rc != SQLITE_OK){
+		freeUserReservations(reservations);
+		return NULL;
+	}
+
+	bindGetUserReservation(passportID, stmt);
+	while((rc = sqlite3_step(stmt)) == SQLITE_ROW){
+		setUserReservationData(&r,stmt);
+		if(addUserReservation(reservations,&r) != EXPAND_OK){
+			freeUserReservations(reservations);
+			return NULL;
+		}
+	}	
+
+	rc = sqlite3_finalize(stmt);
+
+	if(rc != SQLITE_OK){
+		freeUserReservations(reservations);
+		return NULL;
+	}
+
+	return reservations;
+}
+
+void bindGetUserReservation(const char * passportID, sqlite3_stmt * stmt){
+	sqlite3_bind_text(stmt, 1, passportID, -1, SQLITE_STATIC); 
+}
+
+void setUserReservationData(Reservation * rm, sqlite3_stmt * stmt){
+	rm->flightCode = (char *)sqlite3_column_text(stmt, R_FLIGHT_CODE_COLUMN);
+	rm->seatRow = (int) sqlite3_column_int(stmt, R_SEAT_ROW_COLUMN);
+	rm->seatColumn = (int) sqlite3_column_int(stmt, R_SEAT_COLUMN_COLUMN);
+	rm->passportID = (char *)sqlite3_column_text(stmt, R_PASSPORTID_COLUMN);
 }
 
 Plane * getPlaneFromFlight_DB_wo_Semaphores(const char * flightCode, sqlite3 * db){
@@ -597,26 +630,11 @@ int deleteReservation_DB_wo_Semaphores(Reservation * r, sqlite3 * db){
 	return sqlite3_finalize(stmt);
 }
 
-flightReservations * getReservations_DB(const char * flightCode, sqlite3 * db){
-	flightReservations * fres;
-	sem_t * sem, *sem_1, *sem_2;
-
-	sem = openMutexSemaphore(_SEMAPHORE_RESERVATION_NAME_);
-	sem_1 = openMutexSemaphore(_SEMAPHORE_FLIGHTS_NAME_); 
-	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_); 
-	sem_wait(sem_1);//block flight queries
-	sem_wait(sem_2);//block plane queries 
-	sem_wait(sem);
-
-	fres = getReservations_DB_wo_Semaphores(flightCode,db);
-
-	SEM_POST_N_CLOSE(sem_1);
-	SEM_POST_N_CLOSE(sem_2);
-	SEM_POST_N_CLOSE(sem);
-	return fres;
+flightReservations * getFlightReservations_DB(const char * flightCode, sqlite3 * db){
+	return getFlightReservations_DB_wo_Semaphores(flightCode,db);
 }
 
-flightReservations * getReservations_DB_wo_Semaphores(const char * flightCode, sqlite3 * db){
+flightReservations * getFlightReservations_DB_wo_Semaphores(const char * flightCode, sqlite3 * db){
 	int rc;
 	flightReservations * reservations;
 	Plane * p;
@@ -640,10 +658,10 @@ flightReservations * getReservations_DB_wo_Semaphores(const char * flightCode, s
 		return NULL;
 	}
 
-	bindGetReservation(flightCode, stmt);
+	bindGetFlightReservation(flightCode, stmt);
 	while((rc = sqlite3_step(stmt)) == SQLITE_ROW){
-		setReservationData(&rm,stmt);
-		if(addReservation(reservations,&rm) != EXPAND_OK){
+		setFlightReservationData(&rm,stmt);
+		if(addFlightReservation(reservations,&rm) != EXPAND_OK){
 			freeFlightReservations(reservations);
 			return NULL;
 		}
@@ -659,11 +677,11 @@ flightReservations * getReservations_DB_wo_Semaphores(const char * flightCode, s
 	return reservations;
 }
 
-void bindGetReservation(const char * flightCode, sqlite3_stmt * stmt){
+void bindGetFlightReservation(const char * flightCode, sqlite3_stmt * stmt){
 	sqlite3_bind_text(stmt, 1, flightCode, -1, SQLITE_STATIC); 
 }
 
-void setReservationData(ReservationMinimal * rm, sqlite3_stmt * stmt){
+void setFlightReservationData(ReservationMinimal * rm, sqlite3_stmt * stmt){
 	rm->seatRow = (int) sqlite3_column_int(stmt, R_SEAT_ROW_COLUMN);
 	rm->seatColumn = (int) sqlite3_column_int(stmt, R_SEAT_COLUMN_COLUMN);
 }
