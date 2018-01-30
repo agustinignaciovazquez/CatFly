@@ -36,7 +36,7 @@ void printFlightMenu(Flight * fl){
 }
 
 void printFlightsMenu(Flights * fls){
-  fprintf(stdout,"All Flights:\n ");
+  fprintf(stdout,"All Flights:\n");
   if(fls->qFlights == 0){
     fprintf(stdout,"There are no flights in Database\n ");
     return;
@@ -85,12 +85,21 @@ void printReservation(Reservation * r, int i){
   fprintf(stdout,"Seat: %d x %d\n", r->seatRow, r->seatColumn);
 }
 
+void printUserReservations(Reservations * res){
+  int q,i;
+  Reservation * r;
+  for(i = 0, q = res->qReservations; i<q;i++ ){
+    r = res->reservations + i;
+    printReservation(r,i);
+  }
+}
+
 void printPlanes(Planes * pls){
   int q,i;
-
+  Plane * p;
   for(i = 0, q = pls->qPlanes; i<q;i++ ){
-    Plane * f = pls->planes + i;
-    printPlane(f,i);
+    p = pls->planes + i;
+    printPlane(p,i);
   }
 }
 

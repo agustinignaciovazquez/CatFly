@@ -16,6 +16,7 @@ int displayReservationsMenu(int socket);
 int displayReservationsMenu(int socket);
 int displayFlightReservations(Flight * fl, int socket);
 int displayUserReservationsMenu(int socket);
+
 void displaySimpleMenu(int socket){
 	int flag,op;
 	flag = TRUE;
@@ -106,7 +107,7 @@ int displayReservationsMenu(int socket){
 	return op;
 }
 
-int displayUserReservationsMenu(socket){
+int displayUserReservationsMenu(int socket){
 	char passport[MAX_PASSPORTID];
 	Reservations * res;
 
