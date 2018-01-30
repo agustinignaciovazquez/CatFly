@@ -15,8 +15,7 @@ int main(int argc , char *argv[]){
   	int status;
   	char * address = SERVER_ADDR;
   	int port = 7777;
-    char * * res = dinamicMatrix(30,30);
-    printReservations(res,30,30);
+
   	status = connectToServer(address,port);
   	switch(status){
   		case SERVER_CONNECTION_ERROR:

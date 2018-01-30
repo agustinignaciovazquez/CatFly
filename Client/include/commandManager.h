@@ -3,4 +3,6 @@
 
 #include "coreStructs.h"
 
+void displaySimpleMenu(int socket);
+
 #endif 

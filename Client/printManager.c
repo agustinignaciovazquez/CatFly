@@ -8,19 +8,36 @@ int numPlaces (int n);
 void printSimpleMenu(){
   fprintf(stdout,"Flight On-Line \n");
   fprintf(stdout,"Please select one option: \n");
-  fprintf(stdout,"1) Show all flights\n");
-  fprintf(stdout,"2) Reserve a seat\n");
-  fprintf(stdout,"3) Show my flights\n");
+  fprintf(stdout,"%c) Show all flights\n", GET_FLIGHTS_CMD);
+  fprintf(stdout,"%c) Reserve a seat\n", INSERT_FLIGHT_RESERVATION_CMD);
+  fprintf(stdout,"%c) Show my next flights / Cancel a reservation\n", GET_USER_RESERVATIONS_CMD);
+  fprintf(stdout,"%c) Exit\n", DISCONNECT_CMD);
 }
 
 void printAdminMenu(){
   fprintf(stdout,"Flight On-Line System Administration\n");
   fprintf(stdout,"Please select one option: \n");
-  fprintf(stdout,"1) Show all flights\n");
-  fprintf(stdout,"2) Add new flight\n");
-  fprintf(stdout,"3) Reserve a seat\n");
-  fprintf(stdout,"4) Show all planes models\n");
-  fprintf(stdout,"5) Add new plane model\n");
+  fprintf(stdout,"%c) Show all flights\n", GET_FLIGHTS_CMD);
+  fprintf(stdout,"%c) Add new flight\n", INSERT_FLIGHT_CMD);
+  fprintf(stdout,"%c) Remove flight\n", DELETE_FLIGHT_CMD);
+  fprintf(stdout,"%c) Reserve a seat\n", INSERT_FLIGHT_RESERVATION_CMD);
+  fprintf(stdout,"%c) Show all planes models\n", GET_PLANES_CMD);
+  fprintf(stdout,"%c) Add new plane model\n", INSERT_PLANE_CMD);
+  fprintf(stdout,"%c) Remove plane model\n", DELETE_PLANE_CMD);
+  fprintf(stdout,"%c) Exit\n", DISCONNECT_CMD);
+}
+
+void printFlightMenu(Flight * fl){
+  fprintf(stdout,"Flight Details: \n");
+  printFlight(fl);
+  fprintf(stdout,"Please select one option: \n");
+  fprintf(stdout,"%c) Reserve a seat\n", INSERT_FLIGHT_RESERVATION_CMD);
+  fprintf(stdout,"%c) Go back to menu\n", BACK_CMD);
+}
+
+void printFlightsMenu(Flights * fls){
+  printFlights(fls);
+  fprintf(stdout,"Please select one flight OR press 0 to go back: ", BACK_CMD);
 }
 
 void printFlight(Flight * fl){

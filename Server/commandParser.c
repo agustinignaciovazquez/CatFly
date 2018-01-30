@@ -63,6 +63,9 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 		case GET_FLIGHT_RESERVATIONS_CMD:
 			r = getFlightReservations(command, size, response, response_bytes, db);
 			break;
+		case GET_USER_RESERVATIONS_CMD:
+			r = getUserReservations(command, size, response, response_bytes, db);
+			break;
 		case INSERT_FLIGHT_RESERVATION_CMD:
 			r = insertReservation(command, size, response, response_bytes, db);
 			break;
@@ -90,9 +93,6 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 				break;
 			case DELETE_PLANE_CMD:
 				r = deletePlane(command, size, response, response_bytes, db);
-				break;
-			case GET_RESERVATIONS_CMD:
-				r = getUserReservations(command, size, response, response_bytes, db);
 				break;
 		}
 	}

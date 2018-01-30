@@ -1,4 +1,5 @@
 #include "serverHandlerCore.h" 
+#include "commandManager.h"
 #include "constants.h"
 #include "serializeManager.h"
 #include "deserializeManager.h"
@@ -21,7 +22,8 @@ int serverHandler(int socket){
 	con_status = getHelloFromServer(socket, isAdmin);
 	if(con_status != HELLO_OK)
 		return HELLO_ERROR;
-	while(TRUE){
+	displaySimpleMenu(socket);
+	/*while(TRUE){
 		send_buffer = "Q";
 		send_size = strlen(send_buffer);
 
@@ -40,7 +42,7 @@ int serverHandler(int socket){
 			printf("%s \n", read_buffer);
 			free(read_buffer);
 		}
-	}
+	}*/
 
 	return con_status;
 }
