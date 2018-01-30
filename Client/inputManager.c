@@ -29,11 +29,9 @@ int getInt(const char * msg){
 
     char *p, s[LINE_MAX];
     int n;
-
-    while(fgets(s, sizeof(s), stdin) != NULL) {
-        if(msg != NULL)
+    if(msg != NULL)
           printf("%s: ", msg);
-
+    while(fgets(s, sizeof(s), stdin) != NULL) {
         n = strtol(s, &p, 10);
         if ((p != s && *p == '\n'))
             return n;
@@ -48,7 +46,7 @@ int getString(const char * msg, char * str, int max){
 
     if(msg != NULL)
           printf("%s: ", msg);
-        
+
     while( start - str < max - 1 && ( *start++ = getchar() ) != '\n' && *( start - 1 ) != EOF );
     
     if(*( start - 1 ) != '\n' && *( start - 1 ) != EOF)
