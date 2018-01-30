@@ -7,7 +7,8 @@
 char getOption();
 int getInt();
 int getString(char * str, int max);
-ReservationMinimal getSeat();
-Reservation * getSeatForReservation();
 int checkReservationInput(Plane * p, char * * res, Reservation * rm);
+ReservationMinimal getSeat();
+Reservation * getSeatForReservation(const Flight * f);
+
 #endif 

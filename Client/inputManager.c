@@ -2,6 +2,7 @@
 #include "printManager.h"
 #include "expandManager.h"
 #include "constants.h"
+#include "utilsCore.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  
@@ -29,7 +30,7 @@ int getInt(){
     char *p, s[LINE_MAX];
     int n;
 
-    if(fgets(s, sizeof(s), stdin)) {
+    if(fgets(s, sizeof(s), stdin) != NULL) {
         n = strtol(s, &p, 10);
         if ((p != s && *p == '\n'))
             return n;
@@ -38,17 +39,11 @@ int getInt(){
 }
 
 int getString(char * str, int max){
-  int i,c;
-  char * aux;
+  if (fgets(str, max, stdin) != NULL) {
+        return str;
+   }
 
-  aux = str;
-  for(i=0; i< max-1 && (c = getchar()) != '\n' && c != EOF; i++){
-    aux[i] = c;
-    aux++;
-  }
-  aux = '\0';
-
-  return (aux - str);
+  return UNEXPECTED_ERROR;
 }
 
 ReservationMinimal getSeat(){
@@ -60,16 +55,24 @@ ReservationMinimal getSeat(){
   return rm;
 }
 
-Reservation * getSeatForReservation(){
+Reservation * getSeatForReservation(const Flight * f){
   Reservation * rm;
   rm = expandReservation(NULL);
   if(rm == NULL)
     return NULL;
-  printf("Enter passportID: ");
+
+  if(f != NULL){
+    copyStr(rm->flightCode, f->flightCode, MAX_FLIGHTCODE);
+  }else{
+    printf("Enter Flight Code: ");
+    getString(rm->flightCode, MAX_FLIGHTCODE);
+  }
+  
+  printf("Enter PassportID: ");
   getString(rm->passportID, MAX_PASSPORTID);
-  printf("\nEnter seat row: ");
+  printf("Enter seat row: ");
   rm->seatRow = getInt() - 1;
-  printf("\nEnter seat column: ");
+  printf("Enter seat column: ");
   rm->seatColumn = getInt() - 1;
 
   return rm;
