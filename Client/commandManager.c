@@ -4,6 +4,7 @@
 #include "expandManager.h"
 #include "printManager.h"
 #include "constants.h"
+#include "utilsCore.h"
 #include "inputManager.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +12,7 @@
 
 int displayFlightsMenu(int socket);
 int displayFlightMenu(Flight * fl, int socket);
+int displayFlightReservations(Flight * fl, int socket);
 void displaySimpleMenu(int socket){
 	int flag,op;
 	flag = TRUE;
@@ -37,26 +39,32 @@ void displaySimpleMenu(int socket){
 }
 
 int displayFlightsMenu(int socket){
-	int op;
+	int flag,op;
 	Flights * fls;
 	Flight * f;
 	fls = getFlights_Server(socket);
 	if(fls == NULL)
 		return 0;
 
+	flag = TRUE;
 	do{
 		printFlightsMenu(fls);
 		op = getInt();
 		if(op == 0)
-			return op;
-		if(op > 0 && op <= fls->qFlights){
-			f = fls->flights + (op - 1);
-			return displayFlightMenu(f, socket);
-		}
-		printf("Error: Invalid option\n");
-	}while(TRUE);
+			flag = FALSE;//GO BACK
 
-	return 0;
+		if(op > 0 && op <= fls->qFlights){//Check if number is in array bounds
+			flag = FALSE;
+			f = fls->flights + (op - 1);
+			op = displayFlightMenu(f, socket);
+		}else{
+			printf("Error: Invalid option\n");
+		}
+		
+	}while(flag == TRUE);
+
+	freeFlights(fls);
+	return op;
 }
 
 int displayFlightMenu(Flight * fl, int socket){
@@ -67,6 +75,7 @@ int displayFlightMenu(Flight * fl, int socket){
 		op = getOption();
 		switch(op){
 			case INSERT_FLIGHT_RESERVATION_CMD:
+				displayFlightReservations(fl, socket);
 			break;
 			case BACK_CMD:
 				flag = FALSE;
@@ -77,4 +86,32 @@ int displayFlightMenu(Flight * fl, int socket){
 		}
 	}while(flag == TRUE && op != EOF);
 	return op;
+}
+
+int displayFlightReservations(Flight * fl, int socket){
+	Reservation * rm;
+	flightReservations * frs;
+	char * * resMatrix;
+	
+	frs = getFlightReservations_Server(fl, socket);
+	if(frs == NULL)
+		return 0;
+	
+	if((resMatrix = createReservationsMatrix(frs)) == NULL){
+		freeFlightReservations(frs);
+		return 0;
+	}
+
+	printFlight(fl);
+	printReservations(resMatrix, frs->planeSeats);
+	rm = getSeatForReservation();
+
+	if(checkReservationInput(frs->planeSeats,resMatrix,rm) == TRUE){
+		printf("INSERTING FLIGHT RESERVATION");
+	}
+
+	freeExpandedReservation(rm, FALSE);
+	freeReservationsMatrix(frs, resMatrix);
+	freeFlightReservations(frs);
+	return 0;
 }

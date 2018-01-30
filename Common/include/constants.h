@@ -4,7 +4,7 @@
 #define TRUE 1
 #define FALSE 0
 
-//#define DEBUG //COMMENT THIS IN FINAL REV
+#define DEBUG //COMMENT THIS IN FINAL REV
 
 #define OCCUPIED_SEAT 1
 

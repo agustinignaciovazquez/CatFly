@@ -15,6 +15,7 @@ int copyReservation(char * ser, const Reservation * res);
 int copySimpleCmd(char * ser, const simpleCommand * cmd);
 int copyFlightReservations(char * ser, const flightReservations * fres);
 int copySimpleMsg(char * ser, const simpleMessage * mgs);
+int copySimpleMsg_bytes(char * ser, const simpleMessage * sm, int msg_bytes);
 
 char * serializeSimpleCommand(simpleCommand * cmd, int * size){
 	char * s;
@@ -27,14 +28,18 @@ char * serializeSimpleCommand(simpleCommand * cmd, int * size){
 	return s;
 }
 
-char * serializeSimpleMessage(simpleMessage * smgs, int * size){
+char * serializeSimpleMessage(simpleMessage * smgs, int * size, int msg_bytes){
 	char * s;
 	s = malloc(SIMPLE_MSG_SERIALIZE_BYTES);
 	if(s == NULL)
 		return s;	
 
 	//Copy the struct
-	*size = copySimpleMsg(s,smgs);
+	if(msg_bytes <= 0){
+		*size = copySimpleMsg(s,smgs);
+	}else{
+		*size = copySimpleMsg_bytes(s,smgs,msg_bytes);
+	}
 	return s;
 }
 
@@ -155,6 +160,16 @@ int copySimpleMsg(char * ser, const simpleMessage * sm){
 
 	aux += copyBytes(aux, (void *) &(sm->command), sizeof(sm->command));
 	aux += copyStr(aux, sm->msg, MAX_MESSAGE_LENGTH);
+
+	return (aux - ser);
+}
+
+int copySimpleMsg_bytes(char * ser, const simpleMessage * sm, int msg_bytes){
+	char * aux = ser;
+	aux += copyBytes(aux, (void *) &(sm->command), sizeof(sm->command));
+	if(msg_bytes > MAX_MESSAGE_LENGTH)
+		return 0;
+	aux += copyBytes(aux, sm->msg, msg_bytes);
 
 	return (aux - ser);
 }

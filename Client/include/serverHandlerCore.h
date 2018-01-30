@@ -17,6 +17,7 @@
 int serverHandler(int socket);
 int sendSimpleCmd(int socket, simpleCommand * simpleCmd);
 int sendSimpleMsg(int socket, simpleMessage * simpleMsg);
+int sendSimpleMsg_w_bytes(int socket, simpleMessage * simpleMsg, int msg_bytes);
 int getDataAndLengthFromServer(int socket, char * * data, int * bytes);
 
 #endif

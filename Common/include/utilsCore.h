@@ -6,6 +6,7 @@
 int copyStr(char * str, const char * data,  int max);
 int copyBytes(void * dest, const void * data, int bytes);
 char * * createReservationsMatrix(flightReservations * fres);
+void freeReservationsMatrix(flightReservations * fres, char * * res);
 char * * dinamicMatrix(unsigned int rows, unsigned int columns);
 void freeMatrix(char * * matrix, unsigned int rows);
 

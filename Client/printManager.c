@@ -37,7 +37,7 @@ void printFlightMenu(Flight * fl){
 
 void printFlightsMenu(Flights * fls){
   printFlights(fls);
-  fprintf(stdout,"Please select one flight OR press 0 to go back: ", BACK_CMD);
+  fprintf(stdout,"Please select one flight OR press 0 to go back: ");
 }
 
 void printFlight(Flight * fl){
@@ -84,10 +84,15 @@ void printPlanes(Planes * pls){
   }
 }
 
-void printReservations(char * * reservations, int rows, int columns){
+void printReservations(char * * reservations, Plane * p){
     int i,j,spaces,s;
-
-    printf("ROWSxCOLUMNS \n\t");
+    int rows, columns;
+    rows = p->rows;
+    columns = p->columns;
+    printf("FLIGHT SEAT TABLE \n\t");
+    printf("%c: SEAT AVAILABLE \n\t",SEAT_AVAILABLE_DISPLAY);
+    printf("%c: SEAT OCCUPIED \n\t", SEAT_OCCUPIED_DISPLAY);
+    
     for(j = 0; j < columns; j++){
       printf("  %d", (j+1));
     }

@@ -15,6 +15,6 @@ void printFlightsMenu(Flights * fls);
 void printFlightMin(Flight * fl, int i);
 void printPlanes(Planes * pls);
 void printPlane(Plane * pl, int i);
-void printReservations(char * * reservations, int rows, int columns);
+void printReservations(char * * reservations, Plane * p);
 
 #endif 

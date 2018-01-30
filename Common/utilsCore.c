@@ -50,7 +50,10 @@ char * * createReservationsMatrix(flightReservations * fres){
 
     return res;
 }
-
+void freeReservationsMatrix(flightReservations * fres, char * * res){
+    Plane * p = fres->planeSeats;    
+    freeMatrix(res, p->rows);
+}
 char * * dinamicMatrix(unsigned int rows, unsigned int columns){
     int i;
     char * * matrix;

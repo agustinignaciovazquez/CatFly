@@ -64,10 +64,14 @@ int sendSimpleCmd(int socket, simpleCommand * simpleCmd){
 
 //Returns SEND_DATA_OK if sends simple message successfully
 int sendSimpleMsg(int socket, simpleMessage * simpleMsg){
+	return sendSimpleMsg_w_bytes(socket, simpleMsg, 0);
+}
+
+int sendSimpleMsg_w_bytes(int socket, simpleMessage * simpleMsg, int msg_bytes){
 	int status, bytes;
 	char * bytes_aux;
 
-	bytes_aux = serializeSimpleMessage(simpleMsg, &bytes);
+	bytes_aux = serializeSimpleMessage(simpleMsg, &bytes, msg_bytes);
 	if(bytes_aux == NULL)
 		return SEND_DATA_ERROR;
 	

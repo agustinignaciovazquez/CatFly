@@ -155,7 +155,7 @@ int insertFlight(const char * command, int size, char * * response, int * respon
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
-	*response = serializeSimpleMessage(msg, response_bytes);
+	*response = serializeSimpleMessage(msg, response_bytes, 0);
 	freeExpandedSimpleMessage(msg);
 
 	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
@@ -179,7 +179,7 @@ int deleteFlight(const char * command, int size, char * * response, int * respon
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
-	*response = serializeSimpleMessage(msg, response_bytes);
+	*response = serializeSimpleMessage(msg, response_bytes, 0);
 	freeExpandedSimpleMessage(msg);
 	
 	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
@@ -216,7 +216,7 @@ int insertPlane(const char * command, int size, char * * response, int * respons
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
-	*response = serializeSimpleMessage(msg, response_bytes);
+	*response = serializeSimpleMessage(msg, response_bytes,0);
 	freeExpandedSimpleMessage(msg);
 	
 	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
@@ -241,7 +241,7 @@ int deletePlane(const char * command, int size, char * * response, int * respons
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
-	*response = serializeSimpleMessage(msg, response_bytes);
+	*response = serializeSimpleMessage(msg, response_bytes,0);
 	freeExpandedSimpleMessage(msg);
 	
 	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
@@ -255,7 +255,6 @@ int getFlightReservations(const char * command, int size, char * * response, int
 	if(f == NULL)
 		return EXPAND_ERROR;
 	
-
 	if(deserializeFlight(command, size, f) == DESERIALIZE_ERROR){
 		freeExpandedFlight(f, FALSE);
 		return PARSE_ERROR;
@@ -265,8 +264,9 @@ int getFlightReservations(const char * command, int size, char * * response, int
 	freeExpandedFlight(f, FALSE);
 	if(frs == NULL)
 		return SQL_ERROR;
-	
+
 	*response = serializeFlightReservations(frs, response_bytes);
+
 	freeFlightReservations(frs);
 
 	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
@@ -290,7 +290,7 @@ int insertReservation(const char * command, int size, char * * response, int * r
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
-	*response = serializeSimpleMessage(msg, response_bytes);
+	*response = serializeSimpleMessage(msg, response_bytes,0);
 	freeExpandedSimpleMessage(msg);
 	
 	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
@@ -314,7 +314,7 @@ int deleteReservation(const char * command, int size, char * * response, int * r
 	if(msg == NULL)
 		return EXPAND_ERROR;
 
-	*response = serializeSimpleMessage(msg, response_bytes);
+	*response = serializeSimpleMessage(msg, response_bytes,0);
 	freeExpandedSimpleMessage(msg);
 	
 	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;

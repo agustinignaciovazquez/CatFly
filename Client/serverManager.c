@@ -50,7 +50,7 @@ simpleMessage * insertFlight_Server(Flight * f, int socket){
 	setSimpleMessageSettings_w_bytes(request, INSERT_FLIGHT_CMD, serialized, ser_bytes);
 	freeSerialized(serialized);
 
-	status = sendSimpleMsg(socket, request);
+	status = sendSimpleMsg_w_bytes(socket, request, ser_bytes);
 	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;
@@ -87,7 +87,7 @@ simpleMessage * deleteFlight_Server(Flight * f, int socket){
 	setSimpleMessageSettings_w_bytes(request, DELETE_FLIGHT_CMD, serialized, ser_bytes);
 	freeSerialized(serialized);
 
-	status = sendSimpleMsg(socket, request);
+	status = sendSimpleMsg_w_bytes(socket, request, ser_bytes);
 	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;
@@ -148,7 +148,7 @@ simpleMessage * insertPlane_Server(Plane * p, int socket){
 	setSimpleMessageSettings_w_bytes(request, INSERT_PLANE_CMD, serialized, ser_bytes);
 	freeSerialized(serialized);
 
-	status = sendSimpleMsg(socket, request);
+	status = sendSimpleMsg_w_bytes(socket, request, ser_bytes);
 	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;
@@ -185,7 +185,7 @@ simpleMessage * deletePlane_Server(Plane * p, int socket){
 	setSimpleMessageSettings_w_bytes(request, DELETE_PLANE_CMD, serialized, ser_bytes);
 	freeSerialized(serialized);
 
-	status = sendSimpleMsg(socket, request);
+	status = sendSimpleMsg_w_bytes(socket, request, ser_bytes);
 	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;
@@ -204,7 +204,7 @@ simpleMessage * deletePlane_Server(Plane * p, int socket){
 	return response;
 }
 
-flightReservations * getReservations_Server(Flight * f, int socket){
+flightReservations * getFlightReservations_Server(Flight * f, int socket){
 	int status, bytes, ser_bytes;
 	char * serialized,* read_buffer;
 	simpleMessage  * request;
@@ -220,10 +220,10 @@ flightReservations * getReservations_Server(Flight * f, int socket){
 		return NULL;
 	}
 
-	setSimpleMessageSettings_w_bytes(request, INSERT_FLIGHT_CMD, serialized, ser_bytes);
+	setSimpleMessageSettings_w_bytes(request, GET_FLIGHT_RESERVATIONS_CMD, serialized, ser_bytes);
 	freeSerialized(serialized);
 
-	status = sendSimpleMsg(socket, request);
+	status = sendSimpleMsg_w_bytes(socket, request, ser_bytes);
 	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;
@@ -260,7 +260,7 @@ simpleMessage * insertReservation_Server(Reservation * r, int socket){
 	setSimpleMessageSettings_w_bytes(request, INSERT_FLIGHT_RESERVATION_CMD, serialized, ser_bytes);
 	freeSerialized(serialized);
 
-	status = sendSimpleMsg(socket, request);
+	status = sendSimpleMsg_w_bytes(socket, request, ser_bytes);
 	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;
@@ -297,7 +297,7 @@ simpleMessage * insertCancellation_Server(Reservation * r, int socket){
 	setSimpleMessageSettings_w_bytes(request, DELETE_FLIGHT_RESERVATION_CMD, serialized, ser_bytes);
 	freeSerialized(serialized);
 
-	status = sendSimpleMsg(socket, request);
+	status = sendSimpleMsg_w_bytes(socket, request, ser_bytes);
 	freeExpandedSimpleMessage(request);
 	if(status != SEND_DATA_OK)
 		return NULL;

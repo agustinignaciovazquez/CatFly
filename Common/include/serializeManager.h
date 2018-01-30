@@ -11,7 +11,7 @@ char * serializeFlights(Flights * fl, int * size);
 char * serializePlanes(Planes * pl, int * size);
 char * serializeUserReservations(Reservations * res, int * size);
 char * serializeFlightReservations(flightReservations * fres, int * size);
-char * serializeSimpleMessage(simpleMessage * smgs, int * size);
+char * serializeSimpleMessage(simpleMessage * smgs, int * size, int msg_bytes);
 void freeSerialized(char * s);
 
 #endif

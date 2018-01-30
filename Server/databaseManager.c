@@ -3,6 +3,7 @@
 #include "databaseConstants.h"
 #include "expandManager.h"
 #include "semaphores.h"
+#include "utilsCore.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,6 +30,7 @@ int checkCancellation_wo_Semaphores(Reservation * r, sqlite3 *db);
 int isValidSeat(Plane * plane, Reservation * res);
 void setPlaneData(Plane * p, sqlite3_stmt * stmt);
 void setFlightData(Flight * f, sqlite3_stmt * stmt);
+void copyPlaneData(Plane * p , sqlite3_stmt * stmt);
 void setUserReservationData(Reservation * rm, sqlite3_stmt * stmt);
 void setFlightReservationData(ReservationMinimal * rm, sqlite3_stmt * stmt);
 void bindFlightInsertData(Flight * f, sqlite3_stmt * stmt);
@@ -232,7 +234,6 @@ Planes * getPlanes_DB_wo_Semaphores(sqlite3 * db){
 		}
 	}	
 
-      
 	rc = sqlite3_finalize(stmt);
 
 	if(rc != SQLITE_OK){
@@ -320,7 +321,7 @@ Plane * getPlaneFromFlight_DB_wo_Semaphores(const char * flightCode, sqlite3 * d
 		freeExpandedPlane(p, FALSE);
 		return NULL;
 	}	
-	setPlaneData(p,stmt);
+	copyPlaneData(p,stmt);
       
 	rc = sqlite3_finalize(stmt);
 
@@ -334,6 +335,12 @@ Plane * getPlaneFromFlight_DB_wo_Semaphores(const char * flightCode, sqlite3 * d
 
 void bindGetPlaneData(const char * flightCode, sqlite3_stmt * stmt){
 	sqlite3_bind_text(stmt, 1, flightCode, -1, SQLITE_STATIC); 
+}
+
+void copyPlaneData(Plane * p , sqlite3_stmt * stmt){
+	copyStr(p->planeModel, (const char *) sqlite3_column_text(stmt, P_MODEL_COLUMN), MAX_PLANE_MODEL);
+	p->rows = (int) sqlite3_column_int(stmt, P_ROWS_COLUMN);
+	p->columns = (int) sqlite3_column_int(stmt, P_COLUMNS_COLUMN);
 }
 
 simpleMessage * insertPlane_DB(Plane * p, sqlite3 * db){
@@ -416,8 +423,7 @@ simpleMessage * deletePlane_DB_wo_Semaphores(const char * planeModel, sqlite3 * 
 	if(rc != SQLITE_OK){
 		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 		return smsg;
-	}
-	
+	}	
 	
   	bindPlaneDeleteData(planeModel, stmt);
 	rc = sqlite3_step(stmt); 
@@ -425,8 +431,7 @@ simpleMessage * deletePlane_DB_wo_Semaphores(const char * planeModel, sqlite3 * 
 	    setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, sqlite3_errmsg(db));
 	    return smsg;
 	}
-
-      
+ 
 	rc = sqlite3_finalize(stmt);
 
 	if(rc != SQLITE_OK){
@@ -649,6 +654,7 @@ flightReservations * getFlightReservations_DB_wo_Semaphores(const char * flightC
 		freeFlightReservations(reservations);
 		return NULL;
 	}
+
 	setFlightReservationsSettings(reservations, flightCode, p);
 	freeExpandedPlane(p, FALSE);
 	

@@ -69,7 +69,7 @@ FOREIGN KEY (flightCode) REFERENCES flights(flightCode) ON DELETE CASCADE ON UPD
 #define DB_GET_FLIGHTS_QUERY "SELECT * FROM flights;"
 #define DB_GET_FLIGHT_QUERY "SELECT * FROM flights WHERE flightCode = ?;"
 #define DB_GET_PLANES_QUERY "SELECT * FROM planes;"
-#define DB_GET_PLANE_FROM_FLIGHT_CODE_QUERY "SELECT planes.* FROM planes,flights WHERE flights.flightCode = ?;"
+#define DB_GET_PLANE_FROM_FLIGHT_CODE_QUERY "SELECT planes.* FROM planes,flights WHERE flights.planeModel = planes.model AND flights.flightCode = ?;"
 #define DB_GET_RESERVATIONS_QUERY "SELECT * FROM reservations WHERE flightCode = ?;" 
 #define DB_GET_USER_RESERVATIONS_QUERY "SELECT * FROM reservations WHERE passportID = ?;" 
 #define DB_GET_CANCELATIONS_QUERY "SELECT * FROM cancelations WHERE flightCode = ?;"
