@@ -104,10 +104,11 @@ int displayFlightReservations(Flight * fl, int socket){
 
 	printFlight(fl);
 	printReservations(resMatrix, frs->planeSeats);
-	rm = getSeatForReservation(fl);
+	rm = getReservationFromInput(fl);
 
-	if(checkReservationInput(frs->planeSeats,resMatrix,rm) == TRUE || TRUE == TRUE){ //Do server side checks for hacking testing
+	if(checkReservationInput(rm) == TRUE){ 
 		simpleMessage * response;
+		printf("Adding reservation:\n");
 		response = insertReservation_Server(rm, socket);
 		printf("Status: %s\n", response->msg);
 		freeExpandedSimpleMessage(response);
