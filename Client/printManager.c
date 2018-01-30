@@ -36,8 +36,8 @@ void printFlightMenu(Flight * fl){
 }
 
 void printFlightsMenu(Flights * fls){
+  fprintf(stdout,"All Flights:\n ");
   printFlights(fls);
-  fprintf(stdout,"Please select one flight OR press 0 to go back: ");
 }
 
 void printFlight(Flight * fl){

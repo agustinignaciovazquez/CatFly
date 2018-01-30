@@ -49,7 +49,7 @@ int displayFlightsMenu(int socket){
 	flag = TRUE;
 	do{
 		printFlightsMenu(fls);
-		op = getInt();
+		op = getInt("Please select one flight OR press 0 to go back");
 		if(op == 0)
 			flag = FALSE;//GO BACK
 
