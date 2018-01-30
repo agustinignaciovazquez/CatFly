@@ -242,6 +242,38 @@ flightReservations * getFlightReservations_Server(Flight * f, int socket){
 	return response;
 }
 
+Reservations * getUserReservations_Server(const char * passportID, int socket){
+	int status, bytes;
+	char * read_buffer;
+	simpleMessage  * request;
+	Reservations * response;
+
+	request = expandSimpleMessage();
+	if(request == NULL){
+		return NULL;
+	}
+
+	setSimpleMessageSettings(request, GET_USER_RESERVATIONS_CMD, passportID);
+	
+	status = sendSimpleMsg(socket, request);
+	freeExpandedSimpleMessage(request);
+	if(status != SEND_DATA_OK)
+		return NULL;
+
+	status = getDataAndLengthFromServer(socket,&read_buffer,&bytes);
+	if(status != RECEIVE_DATA_OK)
+		return NULL;
+
+	response = expandReservations();
+	if(response == NULL || deserializeReservations(read_buffer, bytes, response) == DESERIALIZE_ERROR){
+		freeUserReservations(response); //If response is a null pointer, no action occurs.
+		response = NULL;
+	}
+
+	free(read_buffer);
+	return response;
+}
+
 simpleMessage * insertReservation_Server(Reservation * r, int socket){
 	int status, bytes,ser_bytes;
 	char * serialized, * read_buffer;

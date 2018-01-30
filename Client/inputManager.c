@@ -16,6 +16,9 @@ int checkSeatIsAvailable(char * * res, Reservation * rm);
 
 char getOption(){
   int i,c, aux;
+
+  printf(":>");
+
   c = getchar();
   for(i = 1;(aux = getchar()) != '\n'; i++){
     if(aux == EOF)
@@ -37,6 +40,8 @@ int getInt(const char * msg){
             return n;
         //Error while parsing string  
         printf("Error: Not a number\n");
+        if(msg != NULL)
+          printf("%s: ", msg);
     }
     return INPUT_ERROR;
 }
@@ -47,7 +52,7 @@ int getString(const char * msg, char * str, int max){
     if(msg != NULL)
           printf("%s: ", msg);
 
-    while( start - str < max - 1 && ( *start++ = getchar() ) != '\n' && *( start - 1 ) != EOF );
+    while( (start - str) < (max - 1) && ( *start++ = getchar() ) != '\n' && *( start - 1 ) != EOF );
     
     if(*( start - 1 ) != '\n' && *( start - 1 ) != EOF)
       CLEAN_BUFFER(c);
@@ -156,7 +161,7 @@ int checkReservationInput(Reservation * rm){
     printf("Error: Flight code length must be %d characters", FLIGHTCODE_LEN);
     return FALSE;
   }
-  if(!(strlen(rm->passportID) < MAX_PASSPORTID_LEN && strlen(rm->passportID) < MIN_PASSPORTID_LEN)){
+  if(!(strlen(rm->passportID) > MIN_PASSPORTID_LEN) && strlen(rm->passportID) < MAX_PASSPORTID_LEN){
     printf("Error: Passport ID length must be between %d and %d characters", MIN_PASSPORTID_LEN, MAX_PASSPORTID_LEN);
     return FALSE;
   }

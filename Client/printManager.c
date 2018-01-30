@@ -7,7 +7,7 @@ int numPlaces (int n);
 
 void printSimpleMenu(){
   fprintf(stdout,"Flight On-Line \n");
-  fprintf(stdout,"Please select one option: \n");
+  fprintf(stdout,"Options: \n");
   fprintf(stdout,"%c) Show all flights\n", GET_FLIGHTS_CMD);
   fprintf(stdout,"%c) Reserve a seat\n", INSERT_FLIGHT_RESERVATION_CMD);
   fprintf(stdout,"%c) Show my next flights / Cancel a reservation\n", GET_USER_RESERVATIONS_CMD);
@@ -16,7 +16,7 @@ void printSimpleMenu(){
 
 void printAdminMenu(){
   fprintf(stdout,"Flight On-Line System Administration\n");
-  fprintf(stdout,"Please select one option: \n");
+  fprintf(stdout,"Options: \n");
   fprintf(stdout,"%c) Show all flights\n", GET_FLIGHTS_CMD);
   fprintf(stdout,"%c) Add new flight\n", INSERT_FLIGHT_CMD);
   fprintf(stdout,"%c) Remove flight\n", DELETE_FLIGHT_CMD);
@@ -30,13 +30,17 @@ void printAdminMenu(){
 void printFlightMenu(Flight * fl){
   fprintf(stdout,"Flight Details: \n");
   printFlight(fl);
-  fprintf(stdout,"Please select one option: \n");
+  fprintf(stdout,"Options: \n");
   fprintf(stdout,"%c) Reserve a seat\n", INSERT_FLIGHT_RESERVATION_CMD);
   fprintf(stdout,"%c) Go back to menu\n", BACK_CMD);
 }
 
 void printFlightsMenu(Flights * fls){
   fprintf(stdout,"All Flights:\n ");
+  if(fls->qFlights == 0){
+    fprintf(stdout,"There are no flights in Database\n ");
+    return;
+  }
   printFlights(fls);
 }
 
@@ -73,6 +77,12 @@ void printPlane(Plane * pl, int i){
   fprintf(stdout,"Plane Model: %s\n", pl->planeModel);
   fprintf(stdout,"Rows: %d\n", pl->rows);
   fprintf(stdout,"Columns: %d\n\n", pl->columns);
+}
+
+void printReservation(Reservation * r, int i){
+  fprintf(stdout,"Select ID: %d /", (int)(i+1));
+  fprintf(stdout,"Flight Code: %s / ", r->flightCode);
+  fprintf(stdout,"Seat: %d x %d\n", r->seatRow, r->seatColumn);
 }
 
 void printPlanes(Planes * pls){

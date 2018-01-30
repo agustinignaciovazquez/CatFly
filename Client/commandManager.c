@@ -12,7 +12,10 @@
 
 int displayFlightsMenu(int socket);
 int displayFlightMenu(Flight * fl, int socket);
+int displayReservationsMenu(int socket);
+int displayReservationsMenu(int socket);
 int displayFlightReservations(Flight * fl, int socket);
+int displayUserReservationsMenu(int socket);
 void displaySimpleMenu(int socket){
 	int flag,op;
 	flag = TRUE;
@@ -24,8 +27,10 @@ void displaySimpleMenu(int socket){
 				op = displayFlightsMenu(socket);
 			break;
 			case INSERT_FLIGHT_RESERVATION_CMD:
+				op = displayReservationsMenu(socket);
 			break;
 			case GET_USER_RESERVATIONS_CMD:
+				op = displayUserReservationsMenu(socket);
 			break;
 			case DISCONNECT_CMD:
 				flag = FALSE;
@@ -49,7 +54,10 @@ int displayFlightsMenu(int socket){
 	flag = TRUE;
 	do{
 		printFlightsMenu(fls);
-		op = getInt("Please select one flight OR press 0 to go back");
+
+		if(fls->qFlights > 0)
+			op = getInt("Please select one flight Or 0 to go back");
+
 		if(op == 0)
 			flag = FALSE;//GO BACK
 
@@ -65,6 +73,53 @@ int displayFlightsMenu(int socket){
 
 	freeFlights(fls);
 	return op;
+}
+
+int displayReservationsMenu(int socket){
+	int flag, op = 0;
+	Flights * fls;
+	Flight * f;
+	fls = getFlights_Server(socket);
+	if(fls == NULL)
+		return 0;
+
+	flag = TRUE;
+	do{
+		printFlightsMenu(fls);
+		if(fls->qFlights > 0)
+			op = getInt("Please select one flight Or 0 to go back");
+
+		if(op == 0)
+			flag = FALSE;//GO BACK
+
+		if(op > 0 && op <= fls->qFlights){//Check if number is in array bounds
+			flag = FALSE;
+			f = fls->flights + (op - 1);
+			op = displayFlightReservations(f, socket);
+		}else{
+			printf("Error: Invalid option\n");
+		}
+		
+	}while(flag == TRUE);
+
+	freeFlights(fls);
+	return op;
+}
+
+int displayUserReservationsMenu(socket){
+	char passport[MAX_PASSPORTID];
+	Reservations * res;
+
+	getString("Enter your passport ID", passport, MAX_PASSPORTID);
+
+	res = getUserReservations_Server(passport, socket);
+	if(res == NULL){
+		printf("Unexpected error .. Please try again later\n");
+		return 0;
+	}
+	printUserReservations(res);
+	freeUserReservations(res);
+	return 0;
 }
 
 int displayFlightMenu(Flight * fl, int socket){
