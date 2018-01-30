@@ -44,9 +44,14 @@ int getInt(const char * msg){
 }
 
 int getString(const char * msg, char * str, int max){
-  if(msg != NULL)
-          printf("%s: ", msg);
-  return (fgets(str, max, stdin) != NULL)? INPUT_OK: INPUT_ERROR;
+    char c, * start = str;
+    while( start - s < max - 1 && ( *start++ = getchar() ) != '\n' && *( start - 1 ) != EOF );
+    
+    if(*( start - 1 ) != '\n' && *( start - 1 ) != EOF)
+      CLEAN_BUFFER(c);
+
+    *start = '\0';
+    return start - s;
 }
 
 Plane * getPlaneFromInput(){
