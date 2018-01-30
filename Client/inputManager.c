@@ -45,13 +45,17 @@ int getInt(const char * msg){
 
 int getString(const char * msg, char * str, int max){
     char c, * start = str;
-    while( start - s < max - 1 && ( *start++ = getchar() ) != '\n' && *( start - 1 ) != EOF );
+
+    if(msg != NULL)
+          printf("%s: ", msg);
+        
+    while( start - str < max - 1 && ( *start++ = getchar() ) != '\n' && *( start - 1 ) != EOF );
     
     if(*( start - 1 ) != '\n' && *( start - 1 ) != EOF)
       CLEAN_BUFFER(c);
 
     *start = '\0';
-    return start - s;
+    return start - str;
 }
 
 Plane * getPlaneFromInput(){
