@@ -353,3 +353,9 @@ simpleMessage * insertCancellation_Server(Reservation * r, int socket){
 	free(read_buffer);
 	return response;
 }
+
+int notifyDisconnection(int socket){
+	simpleCommand request = {.command = DISCONNECT_CMD, .extra = 0};
+	
+	return sendSimpleCmd(socket, &request);
+}

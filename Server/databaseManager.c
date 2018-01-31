@@ -552,9 +552,9 @@ simpleMessage * insertCancellation_DB(Reservation * r, sqlite3 * db){
 
 	setSimpleMessageSettings(msg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_CANCELATION_INCORRECT_PASSPORT);
 	if(checkCancellation_wo_Semaphores(r,db) == TRUE){
-		if(insertCancellation_DB_wo_Semaphores(r,db) == SQLITE_OK){
+		if(deleteReservation_DB_wo_Semaphores(r,db) == SQLITE_OK){
 			setSimpleMessageSettings(msg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_CANCELATION_OK);
-			deleteReservation_DB_wo_Semaphores(r,db);
+			insertCancellation_DB_wo_Semaphores(r,db); //Add cancellation info to DB
 		}else{
 			setSimpleMessageSettings(msg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_CANCELATION_ERROR);
 		}

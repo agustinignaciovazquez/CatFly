@@ -3,6 +3,7 @@
 
 #include "coreStructs.h"
 #define INPUT_ERROR -7
+#define INPUT_OUTBOUNDS -5
 #define INPUT_OK 7
 
 char getOption();

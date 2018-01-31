@@ -1,5 +1,5 @@
 #include "serverHandlerCore.h" 
-#include "commandManager.h"
+#include "menuManager.h"
 #include "constants.h"
 #include "serializeManager.h"
 #include "deserializeManager.h"
@@ -17,34 +17,12 @@ int serverHandler(int socket){
 	int isAdmin;
 	isAdmin = TRUE; //TODO CHANGE LATER
 	con_status = getHelloFromServer(socket, isAdmin);
+
+	//Verify we are connected to the server w/ unique Hello command
 	if(con_status != HELLO_OK)
 		return HELLO_ERROR;
+	
 	displaySimpleMenu(socket);
-
-	/*
-	int read_size, send_size;
-	char * send_buffer;
-	char * read_buffer;
-	while(TRUE){
-		send_buffer = "Q";
-		send_size = strlen(send_buffer);
-
-		//Send req to server
-		con_status = sendDataToServer(socket, send_buffer, send_size);
-		if(con_status != SEND_DATA_OK){
-			return con_status;
-		}
-		//free(read_buffer);
-		//Try to get length and response of prev req
-		con_status = getDataAndLengthFromServer(socket,&read_buffer,&read_size);
-		if(con_status != RECEIVE_DATA_OK && con_status != RESERVE_MEM_ERROR){ //keep alive if reserve mem fails
-			return con_status;
-		}
-		if(con_status == RECEIVE_DATA_OK){
-			printf("%s \n", read_buffer);
-			free(read_buffer);
-		}
-	}*/
 
 	return con_status;
 }

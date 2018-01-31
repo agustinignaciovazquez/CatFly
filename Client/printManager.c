@@ -10,7 +10,8 @@ void printSimpleMenu(){
   fprintf(stdout,"Options: \n");
   fprintf(stdout,"%c) Show all flights\n", GET_FLIGHTS_CMD);
   fprintf(stdout,"%c) Reserve a seat\n", INSERT_FLIGHT_RESERVATION_CMD);
-  fprintf(stdout,"%c) Show my next flights / Cancel a reservation\n", GET_USER_RESERVATIONS_CMD);
+  fprintf(stdout,"%c) Show my reservations\n", GET_USER_RESERVATIONS_CMD);
+  fprintf(stdout,"%c) Cancel a reservation\n", DELETE_FLIGHT_RESERVATION_CMD);
   fprintf(stdout,"%c) Exit\n", DISCONNECT_CMD);
 }
 
@@ -31,6 +32,7 @@ void printFlightMenu(Flight * fl){
   fprintf(stdout,"Flight Details: \n");
   printFlight(fl);
   fprintf(stdout,"Options: \n");
+  fprintf(stdout,"%c) Show reserved seats\n", GET_FLIGHT_RESERVATIONS_CMD);
   fprintf(stdout,"%c) Reserve a seat\n", INSERT_FLIGHT_RESERVATION_CMD);
   fprintf(stdout,"%c) Go back to menu\n", BACK_CMD);
 }
@@ -54,7 +56,9 @@ void printFlight(Flight * fl){
 } 
 
 void printFlightMin(Flight * fl, int i){
-  fprintf(stdout,"Select ID: %d / ", (int)(i+1));
+  if(i >= 0)
+    fprintf(stdout,"Select ID: %d / ", (int)(i+1));
+
   fprintf(stdout,"Flight Code: %s / ", fl->flightCode);
   fprintf(stdout,"Origin: %s / ", fl->origin);
   fprintf(stdout,"Destination: %s / ", fl->destination);
@@ -72,43 +76,12 @@ void printFlights(Flights * fls){
   }
 }
 
-void printPlane(Plane * pl, int i){
-  fprintf(stdout,"Select ID: %d \n", (int)(i+1));
-  fprintf(stdout,"Plane Model: %s\n", pl->planeModel);
-  fprintf(stdout,"Rows: %d\n", pl->rows);
-  fprintf(stdout,"Columns: %d\n\n", pl->columns);
-}
-
-void printReservation(Reservation * r, int i){
-  fprintf(stdout,"Select ID: %d /", (int)(i+1));
-  fprintf(stdout,"Flight Code: %s / ", r->flightCode);
-  fprintf(stdout,"Seat: %d x %d\n", r->seatRow, r->seatColumn);
-}
-
-void printUserReservations(Reservations * res){
-  int q,i;
-  Reservation * r;
-  for(i = 0, q = res->qReservations; i<q;i++ ){
-    r = res->reservations + i;
-    printReservation(r,i);
-  }
-}
-
-void printPlanes(Planes * pls){
-  int q,i;
-  Plane * p;
-  for(i = 0, q = pls->qPlanes; i<q;i++ ){
-    p = pls->planes + i;
-    printPlane(p,i);
-  }
-}
-
 void printReservations(char * * reservations, Plane * p){
     int i,j,spaces,s;
     int rows, columns;
     rows = p->rows;
     columns = p->columns;
-    printf("FLIGHT SEAT TABLE \n\t");
+    //printf("FLIGHT SEAT TABLE \n\t"); 
     printf("%c: SEAT AVAILABLE \n\t",SEAT_AVAILABLE_DISPLAY);
     printf("%c: SEAT OCCUPIED \n\t", SEAT_OCCUPIED_DISPLAY);
     
@@ -128,6 +101,46 @@ void printReservations(char * * reservations, Plane * p){
       }
       printf("\n");
     }
+}
+
+void printPlane(Plane * pl, int i){
+  fprintf(stdout,"Select ID: %d \n", (int)(i+1));
+  fprintf(stdout,"Plane Model: %s\n", pl->planeModel);
+  fprintf(stdout,"Rows: %d\n", pl->rows);
+  fprintf(stdout,"Columns: %d\n\n", pl->columns);
+}
+
+void printPlanes(Planes * pls){
+  int q,i;
+  Plane * p;
+  for(i = 0, q = pls->qPlanes; i<q;i++ ){
+    p = pls->planes + i;
+    printPlane(p,i);
+  }
+}
+
+void printReservationsMenu(Reservations * res){
+  if(res->qReservations == 0){
+    fprintf(stdout,"There are no reservations matching your passport ID\n");
+    return;
+  }
+  fprintf(stdout,"Your reservations:\n");
+  printUserReservations(res);
+}
+
+void printReservation(Reservation * r, int i){
+  fprintf(stdout,"Select ID: %d /", (int)(i+1));
+  fprintf(stdout,"Flight Code: %s / ", r->flightCode);
+  fprintf(stdout,"Seat: %d x %d\n", r->seatRow+1, r->seatColumn+1);
+}
+
+void printUserReservations(Reservations * res){
+  int q,i;
+  Reservation * r;
+  for(i = 0, q = res->qReservations; i<q;i++ ){
+    r = res->reservations + i;
+    printReservation(r,i);
+  }
 }
 
 int numPlaces (int n) {

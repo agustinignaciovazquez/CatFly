@@ -13,5 +13,5 @@ Reservations * getUserReservations_Server(Reservation * r, int socket);
 flightReservations * getFlightReservations_Server(Flight * f, int socket);
 simpleMessage * insertReservation_Server(Reservation * r, int socket);
 simpleMessage * insertCancellation_Server(Reservation * r, int socket);
-
+int notifyDisconnection(int socket);
 #endif 

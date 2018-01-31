@@ -53,12 +53,17 @@ int getString(const char * msg, char * str, int max){
           printf("%s: ", msg);
 
     while( (start - str) < (max - 1) && ( *start++ = getchar() ) != '\n' && *( start - 1 ) != EOF );
-    
-    if(*( start - 1 ) != '\n' && *( start - 1 ) != EOF)
-      CLEAN_BUFFER(c);
-
     *start = '\0';
-    return start - str;
+
+    //Input is larger than expected, check must return false
+    if(*( start - 1 ) != '\n' && *( start - 1 ) != EOF){
+      CLEAN_BUFFER(c);
+      *str = '\0'; //trick to return false in check
+      return INPUT_OUTBOUNDS;
+    }
+
+    
+    return (start - str);
 }
 
 Plane * getPlaneFromInput(){

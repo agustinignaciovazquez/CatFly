@@ -23,7 +23,7 @@
 #define C_SEAT_COLUMN_COLUMN 3
 #define C_PASSPORTID_COLUMN 4
 
-#define DB_CHECK_QUERY "SELECT * FROM flights, planes, reservations, cancelations;"
+#define DB_CHECK_QUERY "SELECT NULL FROM flights, planes, reservations, cancelations;"
 #define DB_ENABLE_FK "PRAGMA foreign_keys = ON;"
 //use https://www.freeformatter.com/java-dotnet-escape.html#ad-output to escape the string
 
@@ -64,7 +64,7 @@ FOREIGN KEY (flightCode) REFERENCES flights(flightCode) ON DELETE CASCADE ON UPD
 
 #define DB_DELETE_FLIGHT_QUERY "DELETE FROM flights WHERE flightCode = ?;"
 #define DB_DELETE_PLANE_QUERY "DELETE FROM planes WHERE model = ?;"
-#define DB_DELETE_RESERVATION_QUERY "DELETE FROM reservation WHERE flightCode = ? AND seatRow = ? AND seatColumn = ?;"
+#define DB_DELETE_RESERVATION_QUERY "DELETE FROM reservations WHERE flightCode = ? AND seatRow = ? AND seatColumn = ?;"
 
 #define DB_GET_FLIGHTS_QUERY "SELECT * FROM flights;"
 #define DB_GET_FLIGHT_QUERY "SELECT * FROM flights WHERE flightCode = ?;"
