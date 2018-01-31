@@ -15,14 +15,14 @@ int getHelloFromServer(int socket, int isAdmin);
 int serverHandler(int socket){
 	int con_status;
 	int isAdmin;
-	isAdmin = TRUE; //TODO CHANGE LATER
+	isAdmin = displaySelection();
 	con_status = getHelloFromServer(socket, isAdmin);
 
 	//Verify we are connected to the server w/ unique Hello command
 	if(con_status != HELLO_OK)
 		return HELLO_ERROR;
 	
-	displayAdminMenu(socket);
+	displayMenu(isAdmin, socket);
 
 	return con_status;
 }

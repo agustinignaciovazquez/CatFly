@@ -5,6 +5,13 @@
 #include <string.h> 
 int numPlaces (int n);
 
+void printSelectionMenu(){
+  fprintf(stdout,"Flight On-Line Log-In\n");
+  fprintf(stdout,"Options: \n");
+  fprintf(stdout,"%d) Enter as Normal User \n", ENTER_AS_USER);
+  fprintf(stdout,"%d) Enter as Administrator \n", ENTER_AS_ADMIN);
+}
+
 void printSimpleMenu(){
   fprintf(stdout,"Flight On-Line \n");
   fprintf(stdout,"Options: \n");
@@ -108,6 +115,21 @@ void printPlane(Plane * pl, int i){
   fprintf(stdout,"Plane Model: %s\n", pl->planeModel);
   fprintf(stdout,"Rows: %d\n", pl->rows);
   fprintf(stdout,"Columns: %d\n\n", pl->columns);
+}
+
+void printPlaneMin(Plane * pl){
+  fprintf(stdout,"Plane Model: %s / ", pl->planeModel);
+  fprintf(stdout,"Rows: %d / ", pl->rows);
+  fprintf(stdout,"Columns: %d /\n", pl->columns);
+}
+
+void printPlanesMenu(Planes * pls){
+  fprintf(stdout,"All Planes:\n");
+  if(pls->qPlanes == 0){
+    fprintf(stdout,"There are no planes in Database\n ");
+    return;
+  }
+  printPlanes(pls);
 }
 
 void printPlanes(Planes * pls){

@@ -1,4 +1,5 @@
 #include "menuManager.h"
+#include "menuAdminManager.h"
 #include "serverManager.h"
 #include "expandManager.h"
 #include "printManager.h"
@@ -8,6 +9,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  
+
+void displaySimpleMenu(int socket);
+void displayFlightMenu(Flight * fl, int socket);
+void displayFlightReservations(Flight * fl, int socket);
+void displayInsertFlightReservation(Flight * fl, int socket);
+void displayUserReservationsMenu(int socket);
+void displayDeleteUserReservationsMenu(int socket);
+void displayCancellation(Reservation * r, int socket);
+Reservations * getUserReservationsById(int socket);
+
+/* Returns TRUE if user selects to be Admin FALSE otherwise*/
+int displaySelection(){
+	int op;
+	do{	
+		printSelectionMenu();
+		op = getInt("Please select one option");
+		switch(op){
+			case ENTER_AS_USER:
+				return FALSE;
+			break;
+			case ENTER_AS_ADMIN:
+				return TRUE;
+			break;
+			default:
+				printf("Invalid number\n");
+			break;
+		}
+		
+	}while(TRUE);
+	return FALSE;
+}
+
+void displayMenu(int isAdmin, int socket){
+	if(isAdmin == TRUE){
+		displayAdminMenu(socket);
+		return;
+	}
+	displaySimpleMenu(socket);
+}
 
 void displaySimpleMenu(int socket){
 	int flag,op;
@@ -39,13 +79,13 @@ void displaySimpleMenu(int socket){
 	}while(flag == TRUE && op != EOF);
 }
 
-int displayFlightsMenu(int socket){
+void displayFlightsMenu(int socket){
 	int flag,op = 0;
 	Flights * fls;
 	Flight * f;
 	fls = getFlights_Server(socket);
 	if(fls == NULL)
-		return 0;
+		return;
 
 	flag = TRUE;
 	do{
@@ -61,7 +101,7 @@ int displayFlightsMenu(int socket){
 		if(op > 0 && op <= fls->qFlights){//Check if number is in array bounds
 			flag = FALSE;
 			f = fls->flights + (op - 1);
-			op = displayFlightMenu(f, socket);
+			displayFlightMenu(f, socket);
 		}else{
 			printf("Error: Invalid option\n");
 		}
@@ -69,10 +109,9 @@ int displayFlightsMenu(int socket){
 	}while(flag == TRUE);
 
 	freeFlights(fls);
-	return op;
 }
 
-int displayFlightMenu(Flight * fl, int socket){
+void displayFlightMenu(Flight * fl, int socket){
 	int flag,op;
 	flag = TRUE;
 	do{
@@ -93,16 +132,15 @@ int displayFlightMenu(Flight * fl, int socket){
 			break;
 		}
 	}while(flag == TRUE && op != EOF);
-	return op;
 }
 
-int displayReservationsMenu(int socket){
+void displayReservationsMenu(int socket){
 	int flag, op = 0;
 	Flights * fls;
 	Flight * f;
 	fls = getFlights_Server(socket);
 	if(fls == NULL)
-		return 0;
+		return;
 
 	flag = TRUE;
 	do{
@@ -126,23 +164,21 @@ int displayReservationsMenu(int socket){
 	}while(flag == TRUE);
 
 	freeFlights(fls);
-	return op;
 }
 
-int displayUserReservationsMenu(int socket){
+void displayUserReservationsMenu(int socket){
 	Reservations * res = getUserReservationsById(socket);
 	printReservationsMenu(res);
 	freeUserReservations(res);
-	return 0;
 }
 
-int displayDeleteUserReservationsMenu(int socket){
+void displayDeleteUserReservationsMenu(int socket){
 	int flag,op = 0;
 	Reservations * res;
 	Reservation * r;
 	res = getUserReservationsById(socket);
 	if(res == NULL)
-		return 0;
+		return;
 
 	flag = TRUE;
 	do{
@@ -166,21 +202,22 @@ int displayDeleteUserReservationsMenu(int socket){
 	}while(flag == TRUE);
 
 	freeUserReservations(res);
-	return op;
 }
 
 void displayCancellation(Reservation * r, int socket){
 	simpleMessage * response;
 	printf("Removing reservation\n");
 	response = insertCancellation_Server(r, socket);
-	printf("Status: %s\n", response->msg);
-	freeExpandedSimpleMessage(response);
+	if(response != NULL){
+		printf("Status: %s\n", response->msg);
+		freeExpandedSimpleMessage(response);
+	}
 }
 
 Reservations * getUserReservationsById(int socket){
 	Reservations * res;
 	Reservation * aux;
-	
+
 	aux = getReservationPassportFromInput();
 	res = getUserReservations_Server(aux, socket);
 	freeExpandedReservation(aux, FALSE);
@@ -193,17 +230,17 @@ Reservations * getUserReservationsById(int socket){
 	return res;
 }
 
-int displayFlightReservations(Flight * fl, int socket){
+void displayFlightReservations(Flight * fl, int socket){
 	flightReservations * frs;
 	char * * resMatrix;
 	
 	frs = getFlightReservations_Server(fl, socket);
 	if(frs == NULL)
-		return 0;
+		return;
 	
 	if((resMatrix = createReservationsMatrix(frs)) == NULL){
 		freeFlightReservations(frs);
-		return 0;
+		return;
 	}
 	printf("Flight Reservations: \n");
 	printFlightMin(fl,-1);
@@ -211,10 +248,9 @@ int displayFlightReservations(Flight * fl, int socket){
 	
 	freeReservationsMatrix(frs, resMatrix);
 	freeFlightReservations(frs);
-	return 0;
 }
 
-int displayInsertFlightReservation(Flight * fl, int socket){
+void displayInsertFlightReservation(Flight * fl, int socket){
 	int r;
 	Reservation * rm;
 
@@ -225,10 +261,11 @@ int displayInsertFlightReservation(Flight * fl, int socket){
 		simpleMessage * response;
 		printf("Adding reservation\n");
 		response = insertReservation_Server(rm, socket);
-		printf("Status: %s\n", response->msg);
-		freeExpandedSimpleMessage(response);
+		if(response != NULL){
+			printf("Status: %s\n", response->msg);
+			freeExpandedSimpleMessage(response);
+		}
 	}
 	displayFlightReservations(fl,socket);
 	freeExpandedReservation(rm, FALSE);
-	return r;
 }

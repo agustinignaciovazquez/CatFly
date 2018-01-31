@@ -5,7 +5,7 @@
 #include <arpa/inet.h> //inet_addr
 #include "serverHandlerCore.h" 
 
-#define CLIENT_TIMEOUT 7
+#define CLIENT_TIMEOUT 37
 
 #define SERVER_CONNECTION_ERROR -7
 
