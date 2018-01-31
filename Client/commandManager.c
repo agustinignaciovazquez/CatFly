@@ -16,6 +16,7 @@ int displayReservationsMenu(int socket);
 int displayReservationsMenu(int socket);
 int displayFlightReservations(Flight * fl, int socket);
 int displayUserReservationsMenu(int socket);
+int displayInsertFlightReservation(Flight * fl, int socket);
 
 void displaySimpleMenu(int socket){
 	int flag,op;
@@ -96,7 +97,7 @@ int displayReservationsMenu(int socket){
 		if(op > 0 && op <= fls->qFlights){//Check if number is in array bounds
 			flag = FALSE;
 			f = fls->flights + (op - 1);
-			op = displayFlightReservations(f, socket);
+			displayInsertFlightReservation(f, socket);
 		}else{
 			printf("Error: Invalid option\n");
 		}
@@ -108,18 +109,20 @@ int displayReservationsMenu(int socket){
 }
 
 int displayUserReservationsMenu(int socket){
-	char passport[MAX_PASSPORTID];
 	Reservations * res;
+	Reservation * aux = expandReservation(NULL);
 
-	getString("Enter your passport ID", passport, MAX_PASSPORTID);
+	getString("Enter your passport ID", aux->passportID, MAX_PASSPORTID);
 
-	res = getUserReservations_Server(passport, socket);
+	res = getUserReservations_Server(aux, socket);
 	if(res == NULL){
 		printf("Unexpected error .. Please try again later\n");
 		return 0;
 	}
+	
 	printUserReservations(res);
 	freeUserReservations(res);
+	freeExpandedReservation(aux, FALSE);
 	return 0;
 }
 
@@ -131,7 +134,7 @@ int displayFlightMenu(Flight * fl, int socket){
 		op = getOption();
 		switch(op){
 			case INSERT_FLIGHT_RESERVATION_CMD:
-				displayFlightReservations(fl, socket);
+				displayInsertFlightReservation(fl, socket);
 			break;
 			case BACK_CMD:
 				flag = FALSE;
@@ -145,7 +148,6 @@ int displayFlightMenu(Flight * fl, int socket){
 }
 
 int displayFlightReservations(Flight * fl, int socket){
-	Reservation * rm;
 	flightReservations * frs;
 	char * * resMatrix;
 	
@@ -160,18 +162,27 @@ int displayFlightReservations(Flight * fl, int socket){
 
 	printFlight(fl);
 	printReservations(resMatrix, frs->planeSeats);
-	rm = getReservationFromInput(fl);
+	
+	freeReservationsMatrix(frs, resMatrix);
+	freeFlightReservations(frs);
+	return 0;
+}
 
-	if(checkReservationInput(rm) == TRUE){ 
+int displayInsertFlightReservation(Flight * fl, int socket){
+	int r;
+	Reservation * rm;
+
+	displayFlightReservations(fl,socket);
+
+	rm = getReservationFromInput(fl);
+	if((r = checkReservationInput(rm)) == TRUE){ 
 		simpleMessage * response;
-		printf("Adding reservation:\n");
+		printf("Adding reservation\n");
 		response = insertReservation_Server(rm, socket);
 		printf("Status: %s\n", response->msg);
 		freeExpandedSimpleMessage(response);
 	}
-
+	displayFlightReservations(fl,socket);
 	freeExpandedReservation(rm, FALSE);
-	freeReservationsMatrix(frs, resMatrix);
-	freeFlightReservations(frs);
-	return 0;
+	return r;
 }

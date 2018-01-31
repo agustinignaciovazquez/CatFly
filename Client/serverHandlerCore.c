@@ -15,15 +15,17 @@ int getHelloFromServer(int socket, int isAdmin);
 int serverHandler(int socket){
 	int con_status;
 	int isAdmin;
-	int read_size, send_size;
-	char * send_buffer;
-	char * read_buffer;
 	isAdmin = TRUE; //TODO CHANGE LATER
 	con_status = getHelloFromServer(socket, isAdmin);
 	if(con_status != HELLO_OK)
 		return HELLO_ERROR;
 	displaySimpleMenu(socket);
-	/*while(TRUE){
+
+	/*
+	int read_size, send_size;
+	char * send_buffer;
+	char * read_buffer;
+	while(TRUE){
 		send_buffer = "Q";
 		send_size = strlen(send_buffer);
 

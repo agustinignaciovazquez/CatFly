@@ -117,7 +117,7 @@ int checkSeatIsInBounds(Plane * p, Reservation * rm){
 
 int checkPlaneInput(Plane * p){
   if(strlen(p->planeModel) != PLANE_MODEL_LEN){
-    printf("Error: Plane model length must be %d characters", PLANE_MODEL_LEN);
+    printf("Error: Plane model length must be %d characters\n", PLANE_MODEL_LEN);
     return FALSE;
   }
   return TRUE;
@@ -125,32 +125,32 @@ int checkPlaneInput(Plane * p){
 
 int checkFlightInput(Flight * f){
   if(strlen(f->flightCode) != FLIGHTCODE_LEN){
-    printf("Error: Flight code length must be %d characters", FLIGHTCODE_LEN);
+    printf("Error: Flight code length must be %d characters\n", FLIGHTCODE_LEN);
     return FALSE;
   }
 
   if(strlen(f->origin) != ORIGIN_LEN){
-    printf("Error: Flight code length must be %d characters", ORIGIN_LEN);
+    printf("Error: Flight code length must be %d characters\n", ORIGIN_LEN);
     return FALSE;
   }
 
   if(strlen(f->destination) != DESTINATION_LEN){
-    printf("Error: Flight code length must be %d characters", DESTINATION_LEN);
+    printf("Error: Flight code length must be %d characters\n", DESTINATION_LEN);
     return FALSE;
   }
 
   if(strlen(f->departureDate) != DEP_DATE_LEN){
-    printf("Error: Flight code length must be %d characters", DEP_DATE_LEN);
+    printf("Error: Flight code length must be %d characters\n", DEP_DATE_LEN);
     return FALSE;
   }
 
   if(strlen(f->arrivalDate) != ARR_DATE_LEN){
-    printf("Error: Flight code length must be %d characters", ARR_DATE_LEN);
+    printf("Error: Flight code length must be %d characters\n", ARR_DATE_LEN);
     return FALSE;
   }
 
   if(strlen(f->planeModel) != PLANE_MODEL_LEN){
-    printf("Error: Plane model length must be %d characters", PLANE_MODEL_LEN);
+    printf("Error: Plane model length must be %d characters\n", PLANE_MODEL_LEN);
     return FALSE;
   }
   return TRUE;
@@ -158,11 +158,11 @@ int checkFlightInput(Flight * f){
 
 int checkReservationInput(Reservation * rm){
   if(strlen(rm->flightCode) != FLIGHTCODE_LEN){
-    printf("Error: Flight code length must be %d characters", FLIGHTCODE_LEN);
+    printf("Error: Flight code length must be %d characters\n", FLIGHTCODE_LEN);
     return FALSE;
   }
   if(!(strlen(rm->passportID) > MIN_PASSPORTID_LEN) && strlen(rm->passportID) < MAX_PASSPORTID_LEN){
-    printf("Error: Passport ID length must be between %d and %d characters", MIN_PASSPORTID_LEN, MAX_PASSPORTID_LEN);
+    printf("Error: Passport ID length must be between %d and %d characters\n", MIN_PASSPORTID_LEN, MAX_PASSPORTID_LEN);
     return FALSE;
   }
     /* Leave this checks do it Server Side
