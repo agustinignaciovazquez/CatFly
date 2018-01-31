@@ -13,6 +13,7 @@ int getString(const char * msg, char * str, int max);
 Plane * getPlaneFromInput();
 int checkPlaneInput(Plane * p);
 Reservation * getReservationFromInput(const Flight * f);
+Reservation * getReservationPassportFromInput();
 int checkReservationInput(Reservation * rm);
 Flight * getFlightFromInput();
 int checkFlightInput(Flight * f);

@@ -22,7 +22,7 @@ int serverHandler(int socket){
 	if(con_status != HELLO_OK)
 		return HELLO_ERROR;
 	
-	displaySimpleMenu(socket);
+	displayAdminMenu(socket);
 
 	return con_status;
 }

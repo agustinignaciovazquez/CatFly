@@ -1,5 +1,4 @@
 #include "menuManager.h"
-#include "serializeManager.h"
 #include "serverManager.h"
 #include "expandManager.h"
 #include "printManager.h"
@@ -10,16 +9,6 @@
 #include <stdlib.h>
 #include <string.h>  
 
-int displayFlightsMenu(int socket);
-int displayFlightMenu(Flight * fl, int socket);
-int displayReservationsMenu(int socket);
-int displayReservationsMenu(int socket);
-int displayFlightReservations(Flight * fl, int socket);
-int displayInsertFlightReservation(Flight * fl, int socket);
-int displayUserReservationsMenu(int socket);
-int displayDeleteUserReservationsMenu(int socket);
-Reservations * getUserReservationsById(int socket);
-void displayCancellation(Reservation * r, int socket);
 void displaySimpleMenu(int socket){
 	int flag,op;
 	flag = TRUE;
@@ -190,10 +179,9 @@ void displayCancellation(Reservation * r, int socket){
 
 Reservations * getUserReservationsById(int socket){
 	Reservations * res;
-	Reservation * aux = expandReservation(NULL);
-
-	getString("Enter your passport ID", aux->passportID, MAX_PASSPORTID);
-
+	Reservation * aux;
+	
+	aux = getReservationPassportFromInput();
 	res = getUserReservations_Server(aux, socket);
 	freeExpandedReservation(aux, FALSE);
 

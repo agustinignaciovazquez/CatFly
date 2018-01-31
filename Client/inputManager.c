@@ -47,21 +47,24 @@ int getInt(const char * msg){
 }
 
 int getString(const char * msg, char * str, int max){
+    int i;
     char c, * start = str;
 
     if(msg != NULL)
           printf("%s: ", msg);
 
-    while( (start - str) < (max - 1) && ( *start++ = getchar() ) != '\n' && *( start - 1 ) != EOF );
+    for(i = 0; (c = getchar()) != '\n' &&  c != EOF; i++){
+        if(i < (max - 1)){
+          *(start++) = c;
+        }
+    }
     *start = '\0';
 
     //Input is larger than expected, check must return false
-    if(*( start - 1 ) != '\n' && *( start - 1 ) != EOF){
-      CLEAN_BUFFER(c);
+    if(i >= max){
       *str = '\0'; //trick to return false in check
       return INPUT_OUTBOUNDS;
     }
-
     
     return (start - str);
 }
@@ -112,6 +115,12 @@ Reservation * getReservationFromInput(const Flight * f){
   return rm;
 }
 
+Reservation * getReservationPassportFromInput(){
+  Reservation * aux = expandReservation(NULL);
+  getString("Enter your passport ID", aux->passportID, MAX_PASSPORTID);
+  return aux;
+}
+
 int checkSeatIsAvailable(char * * res, Reservation * rm){
   return (res[rm->seatRow][rm->seatColumn] == OCCUPIED_SEAT) ? FALSE : TRUE;
 }
@@ -121,8 +130,8 @@ int checkSeatIsInBounds(Plane * p, Reservation * rm){
 }
 
 int checkPlaneInput(Plane * p){
-  if(strlen(p->planeModel) != PLANE_MODEL_LEN){
-    printf("Error: Plane model length must be %d characters\n", PLANE_MODEL_LEN);
+  if(strlen(p->planeModel) > PLANE_MAX_MODEL_LEN){
+    printf("Error: Plane model length must be %d characters\n", PLANE_MAX_MODEL_LEN);
     return FALSE;
   }
   return TRUE;
@@ -135,27 +144,27 @@ int checkFlightInput(Flight * f){
   }
 
   if(strlen(f->origin) != ORIGIN_LEN){
-    printf("Error: Flight code length must be %d characters\n", ORIGIN_LEN);
+    printf("Error: Origin length must be %d characters\n", ORIGIN_LEN);
     return FALSE;
   }
 
   if(strlen(f->destination) != DESTINATION_LEN){
-    printf("Error: Flight code length must be %d characters\n", DESTINATION_LEN);
+    printf("Error: Destination length must be %d characters\n", DESTINATION_LEN);
     return FALSE;
   }
 
   if(strlen(f->departureDate) != DEP_DATE_LEN){
-    printf("Error: Flight code length must be %d characters\n", DEP_DATE_LEN);
+    printf("Error: Departure Date length must be %d characters\n", DEP_DATE_LEN);
     return FALSE;
   }
 
   if(strlen(f->arrivalDate) != ARR_DATE_LEN){
-    printf("Error: Flight code length must be %d characters\n", ARR_DATE_LEN);
+    printf("Error: Arrival Date length must be %d characters\n", ARR_DATE_LEN);
     return FALSE;
   }
 
-  if(strlen(f->planeModel) != PLANE_MODEL_LEN){
-    printf("Error: Plane model length must be %d characters\n", PLANE_MODEL_LEN);
+  if(strlen(f->planeModel) > PLANE_MAX_MODEL_LEN){
+    printf("Error: Plane model length must be %d characters\n", PLANE_MAX_MODEL_LEN);
     return FALSE;
   }
   return TRUE;
@@ -166,7 +175,7 @@ int checkReservationInput(Reservation * rm){
     printf("Error: Flight code length must be %d characters\n", FLIGHTCODE_LEN);
     return FALSE;
   }
-  if(!(strlen(rm->passportID) > MIN_PASSPORTID_LEN) && strlen(rm->passportID) < MAX_PASSPORTID_LEN){
+  if(!(strlen(rm->passportID) >= MIN_PASSPORTID_LEN) && strlen(rm->passportID) <= MAX_PASSPORTID_LEN){
     printf("Error: Passport ID length must be between %d and %d characters\n", MIN_PASSPORTID_LEN, MAX_PASSPORTID_LEN);
     return FALSE;
   }
