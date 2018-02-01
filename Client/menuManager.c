@@ -18,7 +18,7 @@ void displayCancellation(Reservation * r, int socket);
 int displayFlightReservations(Flight * fl, int socket);
 int displayInsertFlightReservation(Flight * fl, int socket);
 Reservations * getUserReservationsById(int socket);
-
+int flightReservationsMatchesFlight(Flight * fl, flightReservations * frs);
 /* Returns TRUE if user selects to be Admin FALSE otherwise*/
 int displaySelection(){
 	int op;
@@ -236,8 +236,8 @@ int displayFlightReservations(Flight * fl, int socket){
 	char * * resMatrix;
 	
 	frs = getFlightReservations_Server(fl, socket);
-	if(frs == NULL || frs->flightCode == NULL){
-		printf("Flight does not exists \n");
+	if(frs == NULL || flightReservationsMatchesFlight(fl, frs) == FALSE){
+		printf("Flight does not exists anymore\n");
 		freeFlightReservations(frs);
 		return STATUS_ERROR_NOT_EXISTS;
 	}
@@ -254,6 +254,10 @@ int displayFlightReservations(Flight * fl, int socket){
 	freeReservationsMatrix(frs, resMatrix);
 	freeFlightReservations(frs);
 	return STATUS_OK;
+}
+
+int flightReservationsMatchesFlight(Flight * fl, flightReservations * frs){
+	return (strcmp(frs->flightCode,fl->flightCode) == 0)? TRUE:FALSE;
 }
 
 int displayInsertFlightReservation(Flight * fl, int socket){
