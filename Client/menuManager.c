@@ -12,11 +12,11 @@
 
 void displaySimpleMenu(int socket);
 void displayFlightMenu(Flight * fl, int socket);
-void displayFlightReservations(Flight * fl, int socket);
-void displayInsertFlightReservation(Flight * fl, int socket);
 void displayUserReservationsMenu(int socket);
 void displayDeleteUserReservationsMenu(int socket);
 void displayCancellation(Reservation * r, int socket);
+int displayFlightReservations(Flight * fl, int socket);
+int displayInsertFlightReservation(Flight * fl, int socket);
 Reservations * getUserReservationsById(int socket);
 
 /* Returns TRUE if user selects to be Admin FALSE otherwise*/
@@ -122,7 +122,7 @@ void displayFlightMenu(Flight * fl, int socket){
 				displayFlightReservations(fl, socket);
 			break;
 			case INSERT_FLIGHT_RESERVATION_CMD:
-				displayInsertFlightReservation(fl, socket);
+				flag = (displayInsertFlightReservation(fl, socket) == STATUS_OK) ? TRUE : FALSE;
 			break;
 			case BACK_CMD:
 				flag = FALSE;
@@ -230,27 +230,33 @@ Reservations * getUserReservationsById(int socket){
 	return res;
 }
 
-void displayFlightReservations(Flight * fl, int socket){
+
+int displayFlightReservations(Flight * fl, int socket){
 	flightReservations * frs;
 	char * * resMatrix;
 	
 	frs = getFlightReservations_Server(fl, socket);
-	if(frs == NULL)
-		return;
+	if(frs == NULL || frs->flightCode == NULL){
+		printf("Flight does not exists \n");
+		freeFlightReservations(frs);
+		return STATUS_ERROR_NOT_EXISTS;
+	}
 	
 	if((resMatrix = createReservationsMatrix(frs)) == NULL){
 		freeFlightReservations(frs);
-		return;
+		return STATUS_ERROR_MATRIX_EXPAND;
 	}
+
 	printf("Flight Reservations: \n");
 	printFlightMin(fl,-1);
 	printReservations(resMatrix, frs->planeSeats);
 	
 	freeReservationsMatrix(frs, resMatrix);
 	freeFlightReservations(frs);
+	return STATUS_OK;
 }
 
-void displayInsertFlightReservation(Flight * fl, int socket){
+int displayInsertFlightReservation(Flight * fl, int socket){
 	int r;
 	Reservation * rm;
 
@@ -266,6 +272,8 @@ void displayInsertFlightReservation(Flight * fl, int socket){
 			freeExpandedSimpleMessage(response);
 		}
 	}
-	displayFlightReservations(fl,socket);
+
+	r = displayFlightReservations(fl,socket);
 	freeExpandedReservation(rm, FALSE);
+	return r;
 }
