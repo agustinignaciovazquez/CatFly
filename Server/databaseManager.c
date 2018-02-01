@@ -700,7 +700,7 @@ flightReservations * getFlightReservations_DB_wo_Semaphores(const char * flightC
 
 	if((p = getPlaneFromFlight_DB_wo_Semaphores(flightCode, db)) == NULL){
 		//freeFlightReservations(reservations);
-		return flightReservations;//Send struct w/ NULLs
+		return reservations;//Send struct w/ NULLs
 	}
 
 	setFlightReservationsSettings(reservations, flightCode, p);
