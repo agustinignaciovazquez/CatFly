@@ -10,6 +10,7 @@ Planes * getPlanes_Server(int socket);
 simpleMessage * insertPlane_Server(Plane * p, int socket);
 simpleMessage * deletePlane_Server(Plane * p, int socket);
 Reservations * getUserReservations_Server(Reservation * r, int socket);
+Reservations * getCancellations_Server(int socket);
 flightReservations * getFlightReservations_Server(Flight * f, int socket);
 simpleMessage * insertReservation_Server(Reservation * r, int socket);
 simpleMessage * insertCancellation_Server(Reservation * r, int socket);

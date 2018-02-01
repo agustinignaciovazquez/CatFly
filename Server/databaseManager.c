@@ -21,6 +21,7 @@ simpleMessage * insertPlane_DB_wo_Semaphores(Plane * p, sqlite3 * db);
 simpleMessage * deletePlane_DB_wo_Semaphores(const char * planeModel, sqlite3 * db);
 flightReservations * getFlightReservations_DB_wo_Semaphores(const char * flightCode, sqlite3 * db);
 Reservations * getUserReservations_DB_wo_Semaphores(const char * passportID, sqlite3 * db);
+Reservations * getCancellations_DB_wo_Semaphores(sqlite3 * db);
 int insertReservation_DB_wo_Semaphores(Reservation * r, sqlite3 * db);
 int checkReservation_wo_Semaphores(Reservation * r, sqlite3 *db);
 int deleteReservation_DB_wo_Semaphores(Reservation * r, sqlite3 * db);
@@ -44,6 +45,7 @@ void bindReservationCheckData(const Reservation * r, sqlite3_stmt * stmt);
 void bindReservationData(const Reservation * r, sqlite3_stmt * stmt);
 void bindGetFlightReservation(const char * flightCode, sqlite3_stmt * stmt);
 void bindGetUserReservation(const char * passportID, sqlite3_stmt * stmt);
+void setCancellationData(Reservation * rm, sqlite3_stmt * stmt);
 
 
 Flights * getFlights_DB(sqlite3 * db){
@@ -300,6 +302,52 @@ void setUserReservationData(Reservation * rm, sqlite3_stmt * stmt){
 	rm->passportID = (char *)sqlite3_column_text(stmt, R_PASSPORTID_COLUMN);
 }
 
+
+Reservations * getCancellations_DB(sqlite3 * db){
+	return getCancellations_DB_wo_Semaphores(db);
+}
+
+Reservations * getCancellations_DB_wo_Semaphores(sqlite3 * db){
+	int rc;
+	Reservations * reservations;
+	Reservation r;
+	sqlite3_stmt * stmt;
+
+	reservations = expandReservations();
+	if(reservations == NULL)
+		return NULL;
+	
+	rc = sqlite3_prepare_v2(db, DB_GET_CANCELLATIONS_QUERY, -1, &stmt, 0);
+	if(rc != SQLITE_OK){
+		freeUserReservations(reservations);
+		return NULL;
+	}
+
+	while((rc = sqlite3_step(stmt)) == SQLITE_ROW){
+		setCancellationData(&r,stmt);
+		if(addUserReservation(reservations,&r) != EXPAND_OK){
+			freeUserReservations(reservations);
+			return NULL;
+		}
+	}	
+
+	rc = sqlite3_finalize(stmt);
+
+	if(rc != SQLITE_OK){
+		freeUserReservations(reservations);
+		return NULL;
+	}
+
+	return reservations;
+}
+
+void setCancellationData(Reservation * rm, sqlite3_stmt * stmt){
+	rm->flightCode = (char *)sqlite3_column_text(stmt, C_FLIGHT_CODE_COLUMN);
+	rm->seatRow = (int) sqlite3_column_int(stmt, C_SEAT_ROW_COLUMN);
+	rm->seatColumn = (int) sqlite3_column_int(stmt, C_SEAT_COLUMN_COLUMN);
+	rm->passportID = (char *)sqlite3_column_text(stmt, C_PASSPORTID_COLUMN);
+}
+
 Plane * getPlaneFromFlight_DB_wo_Semaphores(const char * flightCode, sqlite3 * db){
 	int rc;
 	sqlite3_stmt * stmt;
@@ -552,9 +600,9 @@ simpleMessage * insertCancellation_DB(Reservation * r, sqlite3 * db){
 
 	setSimpleMessageSettings(msg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_CANCELATION_INCORRECT_PASSPORT);
 	if(checkCancellation_wo_Semaphores(r,db) == TRUE){
-		if(deleteReservation_DB_wo_Semaphores(r,db) == SQLITE_OK){
+		if(insertCancellation_DB_wo_Semaphores(r,db) == SQLITE_OK){
 			setSimpleMessageSettings(msg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_CANCELATION_OK);
-			insertCancellation_DB_wo_Semaphores(r,db); //Add cancellation info to DB
+			deleteReservation_DB_wo_Semaphores(r,db); //Add cancellation info to DB
 		}else{
 			setSimpleMessageSettings(msg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_CANCELATION_ERROR);
 		}

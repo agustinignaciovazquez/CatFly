@@ -32,6 +32,7 @@ Flights * getFlights_Server(int socket){
 	return fls;
 }
 
+
 simpleMessage * insertFlight_Server(Flight * f, int socket){
 	int status, bytes,ser_bytes;
 	char * serialized, * read_buffer;
@@ -263,6 +264,30 @@ Reservations * getUserReservations_Server(Reservation * r, int socket){
 
 	status = sendSimpleMsg_w_bytes(socket, request, ser_bytes);
 	freeExpandedSimpleMessage(request);
+	if(status != SEND_DATA_OK)
+		return NULL;
+
+	status = getDataAndLengthFromServer(socket,&read_buffer,&bytes);
+	if(status != RECEIVE_DATA_OK)
+		return NULL;
+
+	response = expandReservations();
+	if(response == NULL || deserializeReservations(read_buffer, bytes, response) == DESERIALIZE_ERROR){
+		freeUserReservations(response); //If response is a null pointer, no action occurs.
+		response = NULL;
+	}
+
+	free(read_buffer);
+	return response;
+}
+
+Reservations * getCancellations_Server(int socket){
+	int status, bytes;
+	char * read_buffer;
+	Reservations * response;
+	simpleCommand request = {.command = GET_CANCELLATIONS_CMD, .extra = 0};
+	
+	status = sendSimpleCmd(socket, &request);
 	if(status != SEND_DATA_OK)
 		return NULL;
 

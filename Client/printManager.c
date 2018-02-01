@@ -29,6 +29,7 @@ void printAdminMenu(){
   fprintf(stdout,"%c) Add new flight\n", INSERT_FLIGHT_CMD);
   fprintf(stdout,"%c) Remove flight\n", DELETE_FLIGHT_CMD);
   fprintf(stdout,"%c) Reserve a seat\n", INSERT_FLIGHT_RESERVATION_CMD);
+  fprintf(stdout,"%c) Show all cancellations\n", GET_CANCELLATIONS_CMD);
   fprintf(stdout,"%c) Show all planes models\n", GET_PLANES_CMD);
   fprintf(stdout,"%c) Add new plane model\n", INSERT_PLANE_CMD);
   fprintf(stdout,"%c) Remove plane model\n", DELETE_PLANE_CMD);
@@ -151,7 +152,8 @@ void printReservationsMenu(Reservations * res){
 }
 
 void printReservation(Reservation * r, int i){
-  fprintf(stdout,"Select ID: %d /", (int)(i+1));
+  if(i >= 0)
+    fprintf(stdout,"Select ID: %d / ", (int)(i+1));
   fprintf(stdout,"Flight Code: %s / ", r->flightCode);
   fprintf(stdout,"Seat: %d x %d\n", r->seatRow+1, r->seatColumn+1);
 }
@@ -163,6 +165,32 @@ void printUserReservations(Reservations * res){
     r = res->reservations + i;
     printReservation(r,i);
   }
+}
+
+void printCancellationsMenu(Reservations * res){
+  if(res->qReservations == 0){
+    fprintf(stdout,"There are no cancellations in Database\n");
+    return;
+  }
+  fprintf(stdout,"Cancellations:\n");
+  printCancellations(res);
+}
+
+void printCancellations(Reservations * res){
+  int q,i;
+  Reservation * r;
+  for(i = 0, q = res->qReservations; i<q;i++ ){
+    r = res->reservations + i;
+    printCancellation(r,i);
+  }
+}
+
+void printCancellation(Reservation * r,int i){
+  if(i >= 0)
+    fprintf(stdout,"ID: %d / ", (int)(i+1));
+  fprintf(stdout,"Flight Code: %s / ", r->flightCode);
+  fprintf(stdout,"Passport ID: %s / ", r->passportID);
+  fprintf(stdout,"Seat: %d x %d\n", r->seatRow+1, r->seatColumn+1);
 }
 
 int numPlaces (int n) {

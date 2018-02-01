@@ -10,6 +10,7 @@
 
 int getAllFlights(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int getFlightReservations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
+int getAllCancellations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int insertFlight(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int deleteFlight(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
 int getPlanes(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db);
@@ -46,6 +47,7 @@ int verifyHelloResponse(const char * data, int bytes){
 int verifyHelloAdminResponse(const char * data, int bytes){
 	return verifySimpleCmdFromClient(data,bytes,HELLO_ADMIN_CODE_CMD,CLIENT_ADMIN_HELLO_OK);
 }
+
 int parseRequest(const char * command, int size, char * * response, int * response_bytes, int isAdmin){
 	cmd_id action;
 	int r;
@@ -94,8 +96,12 @@ int parseRequest(const char * command, int size, char * * response, int * respon
 			case DELETE_PLANE_CMD:
 				r = deletePlane(command, size, response, response_bytes, db);
 				break;
+			case GET_CANCELLATIONS_CMD:
+				r = getAllCancellations(command, size, response, response_bytes, db);
+				break;
 		}
 	}
+
 	closeDatabase(db);
 	return r;
 }
@@ -112,7 +118,6 @@ int getAllFlights(const char * command, int size, char * * response, int * respo
 	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
 }
 
- 
 int getUserReservations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
 	Reservations * res;
 	Reservation * r;
@@ -131,6 +136,18 @@ int getUserReservations(const char * command, int size, char * * response, int *
 	if(res == NULL)
 		return SQL_ERROR;
 	
+	*response = serializeUserReservations(res, response_bytes);
+	freeUserReservations(res);
+
+	return (*response != NULL) ? RESPONSE_OK : EXPAND_ERROR;
+}
+
+int getAllCancellations(const char * command, int size, char * * response, int * response_bytes, sqlite3 * db){
+	Reservations * res;
+	
+	if((res = getCancellations_DB(db)) == NULL)
+		return SQL_ERROR;
+
 	*response = serializeUserReservations(res, response_bytes);
 	freeUserReservations(res);
 

@@ -17,6 +17,7 @@ void displayDeleteFlightsMenu(int socket);
 void displayDeletePlanesMenu(int socket);
 void displayDeleteFlight(Flight * fl, int socket);
 void displayDeletePlane(Plane * pl, int socket);
+void displayCancellationsMenu(int socket);
 
 void displayAdminMenu(int socket){
 	int flag,op;
@@ -46,6 +47,9 @@ void displayAdminMenu(int socket){
 			case DELETE_PLANE_CMD:
 				displayDeletePlanesMenu(socket);
 			break;
+			case GET_CANCELLATIONS_CMD:
+				displayCancellationsMenu(socket);
+				break;
 			case DISCONNECT_CMD:
 				notifyDisconnection(socket);
 				flag = FALSE;
@@ -126,6 +130,15 @@ void displayPlanesMenu(int socket){
 		return;
 	printPlanesMenu(pls);
 	freePlanes(pls);
+}
+
+void displayCancellationsMenu(int socket){
+	Reservations * cls;
+	cls = getCancellations_Server(socket);
+	if(cls == NULL)
+		return;
+	printCancellationsMenu(cls);
+	freeUserReservations(cls);
 }
 
 void displayInsertPlane(int socket){
