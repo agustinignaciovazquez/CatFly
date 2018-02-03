@@ -14,7 +14,7 @@
 int main(int argc , char *argv[]){
   	int status;
   	char * address = SERVER_ADDR;
-  	int port = 7777;
+  	int port = SERVER_PORT;
 
   	status = connectToServer(address,port);
   	switch(status){
