@@ -12,9 +12,10 @@
 #include <time.h>
 
 #define DDOSS_SEMPAHORE_NAME "___DDOSS_TEST_SEM___"
-#define MAX_CHILDS 10
+#define MAX_CHILDS 15
 
 void simpleAttack();
+void efficientAttack();
 
 void simpleDDoSS(){
 	int pid;
@@ -42,6 +43,34 @@ void simpleDDoSS(){
 	sem_close(sem);
 
 }
+
+void efficientDDoSS(){
+	int pid;
+	sem_t * sem;
+
+	printf("\n\nServer DDOSS efficient test\n");
+	sem = openSemaphore(DDOSS_SEMPAHORE_NAME, MAX_CHILDS);
+	while(TRUE){
+		sem_wait(sem);
+		pid = fork();
+		if(pid < 0){
+			fprintf(stderr,"Error: Fork failed \n");
+			exit(-1);			
+		}
+
+		if(pid == 0){
+			//Child process
+			efficientAttack();
+			sem_post(sem);
+			exit(0); 
+		}else{
+			//do nothing
+		}
+	}
+	sem_close(sem);
+
+}
+
 void simpleAttack(){
 	int socket;
 	while(TRUE){
@@ -54,4 +83,22 @@ void simpleAttack(){
 		sendFuzzData(socket);
 		close(socket);
 	}
+}
+
+void efficientAttack(){
+	int socket;
+	Flights * fls;
+
+	socket = createSocket(SERVER_ADDR, SERVER_PORT);
+    if(socket == SERVER_CONNECTION_ERROR){
+    	printf("Error server unreacheable\n");
+    	return;
+    }
+    getHelloFromServer(socket, FALSE);//Hello as normal user
+
+    do{
+		fls = getFlights_Server(socket);
+	}while(fls != NULL);
+
+	close(socket);
 }

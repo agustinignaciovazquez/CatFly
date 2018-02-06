@@ -4,5 +4,6 @@
 #include "coreStructs.h"
 
 void simpleDDoSS();
+void efficientDDoSS();
 
 #endif 

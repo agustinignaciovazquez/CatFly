@@ -20,6 +20,7 @@ int main(int argc , char *argv[]){
 	fuzzTest_in_HELLO_REQ();
 	notAdminTest();
 	//simpleDDoSS();
+	efficientDDoSS();
     return 0;
 }  
  
