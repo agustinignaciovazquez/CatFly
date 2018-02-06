@@ -17,6 +17,7 @@ int main(int argc , char *argv[]){
 	//Server Tests
 	fuzzTest();
 	fuzzTest_in_HELLO_REQ();
+	notAdminTest();
     return 0;
 }  
  

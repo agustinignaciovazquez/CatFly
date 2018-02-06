@@ -16,6 +16,7 @@ OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 OBJECTS += $(patsubst %.c, %.o, $(wildcard ../Common/*.c))
 OBJECTS += $(patsubst %.c, %.o, $(wildcard ../Client/serverHandlerCore.c))
 OBJECTS += $(patsubst %.c, %.o, $(wildcard ../Client/clientCore.c))
+OBJECTS += $(patsubst %.c, %.o, $(wildcard ../Client/serverManager.c))
 %.o: %.c 
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
