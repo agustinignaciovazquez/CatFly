@@ -36,6 +36,7 @@
 #define CLIENT_ADMIN_HELLO_OK 777
 #define SERVER_HELLO_OK 501
 #define SERVER_RESPONSE_INSERT_FLIGHT_OK "Flight added successfully"
+#define SERVER_RESPONSE_INSERT_FLIGHT_DATE_ERROR "Dates are invalid"
 #define SERVER_RESPONSE_INSERT_PLANE_OK "Plane added successfully"
 #define SERVER_RESPONSE_INSERT_RES_OK "Reservation added successfully"
 #define SERVER_RESPONSE_INSERT_RES_ERROR "Error adding reservation. Try again later."

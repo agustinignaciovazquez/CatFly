@@ -32,11 +32,17 @@ simpleMessage * expandSimpleMessage(){
 }
 
 void setSimpleMessageSettings(simpleMessage * sMsgs, cmd_id cmd,const char * msg){
+	if(sMsgs == NULL)
+		return;
+
 	copyStr(sMsgs->msg, msg, MAX_MESSAGE_LENGTH);
 	sMsgs->command = cmd;
 }
 
 void setSimpleMessageSettings_w_bytes(simpleMessage * sMsgs, cmd_id cmd, const char * msg, int msg_bytes){
+	if(sMsgs == NULL)
+		return;
+
 	char * messageStr = sMsgs->msg;
 	copyBytes(messageStr, msg, msg_bytes);
 	messageStr[msg_bytes] = '\0';
@@ -278,6 +284,9 @@ flightReservations * expandFlightReservations(){
 }
 
 void setFlightReservationsSettings(flightReservations * frs, const char * flightCode, const Plane * pl){
+	if(frs == NULL)
+		return;
+	
 	copyStr(frs->flightCode, flightCode, MAX_FLIGHTCODE);
 	PlaneDeepCopy((frs->planeSeats), pl);
 }

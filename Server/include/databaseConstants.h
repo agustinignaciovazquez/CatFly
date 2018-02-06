@@ -76,5 +76,6 @@ FOREIGN KEY (flightCode) REFERENCES flights(flightCode) ON DELETE CASCADE ON UPD
 
 #define DB_CHECK_RESERVATION_QUERY "SELECT count(*) FROM reservations WHERE flightCode = ? AND seatRow = ? AND seatColumn = ?;"
 #define DB_CHECK_CANCELATION_QUERY "SELECT count(*) FROM reservations WHERE flightCode = ? AND seatRow = ? AND seatColumn = ? AND passportID = ?;"
+#define DB_CHECK_DATE_QUERY "SELECT (julianday(?) - julianday(?));"
 #endif
  

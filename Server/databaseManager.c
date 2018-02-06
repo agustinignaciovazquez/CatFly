@@ -27,6 +27,7 @@ int checkReservation_wo_Semaphores(Reservation * r, sqlite3 *db);
 int deleteReservation_DB_wo_Semaphores(Reservation * r, sqlite3 * db);
 int insertCancellation_DB_wo_Semaphores(Reservation * r, sqlite3 * db);
 int checkCancellation_wo_Semaphores(Reservation * r, sqlite3 *db);
+int checkDate_wo_Semaphores(Flight * f, sqlite3 *db);
 
 int isValidSeat(Plane * plane, Reservation * res);
 void setPlaneData(Plane * p, sqlite3_stmt * stmt);
@@ -46,6 +47,7 @@ void bindReservationData(const Reservation * r, sqlite3_stmt * stmt);
 void bindGetFlightReservation(const char * flightCode, sqlite3_stmt * stmt);
 void bindGetUserReservation(const char * passportID, sqlite3_stmt * stmt);
 void setCancellationData(Reservation * rm, sqlite3_stmt * stmt);
+void bindDateData(Flight * f, sqlite3_stmt * stmt);
 
 
 Flights * getFlights_DB(sqlite3 * db){
@@ -104,12 +106,48 @@ simpleMessage * insertFlight_DB(Flight * f, sqlite3 * db){
 	sem_2 = openMutexSemaphore(_SEMAPHORE_PLANES_NAME_);
 	sem_wait(sem);
 	sem_wait(sem_2);
-
-	smsg = insertFlight_DB_wo_Semaphores(f,db);
+	if(checkDate_wo_Semaphores(f,db) == TRUE){
+		smsg = insertFlight_DB_wo_Semaphores(f,db);
+	}else{
+		smsg = expandSimpleMessage();
+		setSimpleMessageSettings(smsg, RESPONSE_CODE_CMD, SERVER_RESPONSE_INSERT_FLIGHT_DATE_ERROR);
+	}
 
 	SEM_POST_N_CLOSE(sem);
 	SEM_POST_N_CLOSE(sem_2);
 	return smsg;
+}
+
+/* Returns TRUE IF Date is formatted and correct */
+int checkDate_wo_Semaphores(Flight * f, sqlite3 *db){
+	int rc;
+	double q;
+	int check = FALSE;
+	sqlite3_stmt * stmt;
+
+	rc = sqlite3_prepare_v2(db, DB_CHECK_DATE_QUERY, -1, &stmt, 0);
+	if(rc != SQLITE_OK){
+		return check;
+	}
+	
+  	bindDateData(f, stmt);
+	rc = sqlite3_step(stmt); 
+	if (rc == SQLITE_ROW) {
+		q = sqlite3_column_double(stmt, 0);
+	    check = (q > 0)? TRUE:FALSE;
+	}
+     
+	rc = sqlite3_finalize(stmt);
+	if(rc != SQLITE_OK){
+		return check;
+	}
+	
+	return check;
+}
+
+void bindDateData(Flight * f, sqlite3_stmt * stmt){ 
+	sqlite3_bind_text(stmt, 1, f->arrivalDate, -1, SQLITE_STATIC); //Arrival date first so row fetch > 0;
+  	sqlite3_bind_text(stmt, 2, f->departureDate, -1, SQLITE_STATIC);    
 }
 
 simpleMessage * insertFlight_DB_wo_Semaphores(Flight * f, sqlite3 * db){

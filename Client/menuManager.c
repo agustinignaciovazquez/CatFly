@@ -12,13 +12,15 @@
 
 void displaySimpleMenu(int socket);
 void displayFlightMenu(Flight * fl, int socket);
-void displayUserReservationsMenu(int socket);
-void displayDeleteUserReservationsMenu(int socket);
-void displayCancellation(Reservation * r, int socket);
+int displayDeleteUserReservationsMenu(int socket);
+int displayCancellation(Reservation * r, int socket);
+int displayDisconnection(int socket);
 int displayFlightReservations(Flight * fl, int socket);
+int displayUserReservationsMenu(int socket);
 int displayInsertFlightReservation(Flight * fl, int socket);
 Reservations * getUserReservationsById(int socket);
 int flightReservationsMatchesFlight(Flight * fl, flightReservations * frs);
+
 /* Returns TRUE if user selects to be Admin FALSE otherwise*/
 int displaySelection(){
 	int op;
@@ -57,20 +59,19 @@ void displaySimpleMenu(int socket){
 		op = getOption();
 		switch(op){
 			case GET_FLIGHTS_CMD:
-				displayFlightsMenu(socket);
+				flag = displayFlightsMenu(socket);
 			break;
 			case INSERT_FLIGHT_RESERVATION_CMD:
-				displayReservationsMenu(socket);
+				flag = displayReservationsMenu(socket);
 			break;
 			case GET_USER_RESERVATIONS_CMD:
-				displayUserReservationsMenu(socket);
+				flag = displayUserReservationsMenu(socket);
 			break;
 			case DELETE_FLIGHT_RESERVATION_CMD:
-				displayDeleteUserReservationsMenu(socket);
+				flag = displayDeleteUserReservationsMenu(socket);
 			break;
 			case DISCONNECT_CMD:
-				notifyDisconnection(socket);
-				flag = FALSE;
+				flag = displayDisconnection(socket);
 			break;
 			default:
 				printf("Error: Invalid option\n");
@@ -79,13 +80,20 @@ void displaySimpleMenu(int socket){
 	}while(flag == TRUE && op != EOF);
 }
 
-void displayFlightsMenu(int socket){
+int displayDisconnection(int socket){
+	printf("Disconecting...\n");
+	notifyDisconnection(socket);
+	return FALSE;
+}
+
+/* Returns FALSE if Server is not reachable */
+int displayFlightsMenu(int socket){
 	int flag,op = 0;
 	Flights * fls;
 	Flight * f;
 	fls = getFlights_Server(socket);
 	if(fls == NULL)
-		return;
+		return FALSE;
 
 	flag = TRUE;
 	do{
@@ -109,6 +117,7 @@ void displayFlightsMenu(int socket){
 	}while(flag == TRUE);
 
 	freeFlights(fls);
+	return TRUE;
 }
 
 void displayFlightMenu(Flight * fl, int socket){
@@ -119,7 +128,7 @@ void displayFlightMenu(Flight * fl, int socket){
 		op = getOption();
 		switch(op){
 			case GET_FLIGHT_RESERVATIONS_CMD:
-				displayFlightReservations(fl, socket);
+				flag = (displayFlightReservations(fl, socket)  == STATUS_OK) ? TRUE : FALSE;
 			break;
 			case INSERT_FLIGHT_RESERVATION_CMD:
 				flag = (displayInsertFlightReservation(fl, socket) == STATUS_OK) ? TRUE : FALSE;
@@ -134,13 +143,14 @@ void displayFlightMenu(Flight * fl, int socket){
 	}while(flag == TRUE && op != EOF);
 }
 
-void displayReservationsMenu(int socket){
+/* Returns FALSE if Server is not reachable */
+int displayReservationsMenu(int socket){
 	int flag, op = 0;
 	Flights * fls;
 	Flight * f;
 	fls = getFlights_Server(socket);
 	if(fls == NULL)
-		return;
+		return FALSE;
 
 	flag = TRUE;
 	do{
@@ -164,21 +174,27 @@ void displayReservationsMenu(int socket){
 	}while(flag == TRUE);
 
 	freeFlights(fls);
+	return TRUE;
 }
 
-void displayUserReservationsMenu(int socket){
+/* Returns FALSE if Server is not reachable */
+int displayUserReservationsMenu(int socket){
 	Reservations * res = getUserReservationsById(socket);
+	if(res == NULL)
+		return FALSE;
+
 	printReservationsMenu(res);
 	freeUserReservations(res);
+	return TRUE;
 }
 
-void displayDeleteUserReservationsMenu(int socket){
+int displayDeleteUserReservationsMenu(int socket){
 	int flag,op = 0;
 	Reservations * res;
 	Reservation * r;
 	res = getUserReservationsById(socket);
 	if(res == NULL)
-		return;
+		return FALSE;
 
 	flag = TRUE;
 	do{
@@ -194,7 +210,10 @@ void displayDeleteUserReservationsMenu(int socket){
 		if(op > 0 && op <= res->qReservations){//Check if number is in array bounds
 			flag = FALSE;
 			r = res->reservations + (op - 1);
-			displayCancellation(r, socket);
+			if(displayCancellation(r, socket) == FALSE){
+				freeUserReservations(res);
+				return FALSE;
+			}
 		}else{
 			printf("Error: Invalid option\n");
 		}
@@ -202,16 +221,19 @@ void displayDeleteUserReservationsMenu(int socket){
 	}while(flag == TRUE);
 
 	freeUserReservations(res);
+	return TRUE;
 }
 
-void displayCancellation(Reservation * r, int socket){
+int displayCancellation(Reservation * r, int socket){
 	simpleMessage * response;
 	printf("Removing reservation\n");
 	response = insertCancellation_Server(r, socket);
-	if(response != NULL){
-		printf("Status: %s\n", response->msg);
-		freeExpandedSimpleMessage(response);
-	}
+	if(response == NULL)
+		return FALSE;
+	
+	printf("Status: %s\n", response->msg);
+	freeExpandedSimpleMessage(response);
+	return TRUE;
 }
 
 Reservations * getUserReservationsById(int socket){

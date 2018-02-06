@@ -10,6 +10,6 @@
 int displaySelection();
 void displayMenu(int isAdmin, int socket);
 //Shared functions between menuAdmin and menuSimple
-void displayFlightsMenu(int socket);
-void displayReservationsMenu(int socket);
+int displayFlightsMenu(int socket);
+int displayReservationsMenu(int socket);
 #endif 
