@@ -1,4 +1,5 @@
 #include "clientCore.h"
+#include "serverHandlerMenu.h" 
 #include "coreStructs.h"
 #include "constants.h"
 #include "printManager.h"
@@ -10,6 +11,7 @@
 #define SERVER_ADDR NULL
 #define SERVER_PORT 7777
 
+int connectToServer(const char * address, int port);
 
 int main(int argc , char *argv[]){
   	int status;
@@ -28,3 +30,13 @@ int main(int argc , char *argv[]){
   	
     return status;
 }  
+
+int connectToServer(const char * address, int port){
+  int socket;
+
+    socket = createSocket(address, port);
+    if(socket == SERVER_CONNECTION_ERROR)
+      return SERVER_CONNECTION_ERROR;
+    
+    return serverHandler(socket);
+} 

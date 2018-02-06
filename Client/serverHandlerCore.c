@@ -1,5 +1,4 @@
 #include "serverHandlerCore.h" 
-#include "menuManager.h"
 #include "constants.h"
 #include "serializeManager.h"
 #include "deserializeManager.h"
@@ -7,25 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-int sendDataToServer(int socket, char * data, int bytes);
-int getDataFromServer(int socket, char * buffer, int max_bytes, int * data_size);
-int getHelloFromServer(int socket, int isAdmin);
-
-int serverHandler(int socket){
-	int con_status;
-	int isAdmin;
-	isAdmin = displaySelection();
-	con_status = getHelloFromServer(socket, isAdmin);
-
-	//Verify we are connected to the server w/ unique Hello command
-	if(con_status != HELLO_OK)
-		return HELLO_ERROR;
-	
-	displayMenu(isAdmin, socket);
-
-	return con_status;
-}
 
 //Returns SEND_DATA_OK if sends simple command successfully
 int sendSimpleCmd(int socket, simpleCommand * simpleCmd){

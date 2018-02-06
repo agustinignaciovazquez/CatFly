@@ -74,9 +74,9 @@ Plane * getPlaneFromInput(){
   p = expandPlane(NULL);
   if(p == NULL)
     return NULL;
-  getString("Enter Plane Model",p->planeModel, MAX_PLANE_MODEL);
-  p->rows = getInt("Enter seat rows");
-  p->columns = getInt("Enter seat columns");
+  getString("Enter Plane Model (length <= 10, e.g. BNG777)",p->planeModel, MAX_PLANE_MODEL);
+  p->rows = getInt("Enter seat rows (> 0 & < 100)");
+  p->columns = getInt("Enter seat columns (> 0 & < 100)");
   return p;
 }
 
@@ -86,12 +86,12 @@ Flight * getFlightFromInput(){
   if(f == NULL)
     return NULL;
   
-  getString("Enter Flight Code",f->flightCode, MAX_FLIGHTCODE);
-  getString("Enter Origin",f->origin, MAX_ORIGIN);
-  getString("Enter Destination",f->destination, MAX_DESTINATION);
-  getString("Enter Departure Date",f->departureDate, MAX_DEP_DATE);
-  getString("Enter Arrival Date",f->arrivalDate, MAX_ARR_DATE);
-  getString("Enter Plane Model",f->planeModel, MAX_PLANE_MODEL);
+  getString("Enter Flight Code (length = 4, e.g. AAA1)",f->flightCode, MAX_FLIGHTCODE);
+  getString("Enter Origin (length = 3, e.g. EZE)",f->origin, MAX_ORIGIN);
+  getString("Enter Destination (length = 3, e.g. MIA)",f->destination, MAX_DESTINATION);
+  getString("Enter Departure Date (length = 16, e.g. 2017-07-02 11:00)",f->departureDate, MAX_DEP_DATE);
+  getString("Enter Arrival Date (length = 16, e.g. 2017-07-03 11:00)",f->arrivalDate, MAX_ARR_DATE);
+  getString("Enter Plane Model (length <= 10, e.g. BNG777)",f->planeModel, MAX_PLANE_MODEL);
 
   return f;
 }
@@ -108,7 +108,7 @@ Reservation * getReservationFromInput(const Flight * f){
     getString("Enter Flight Code",rm->flightCode, MAX_FLIGHTCODE);
   }
 
-  getString("Enter PassportID",rm->passportID, MAX_PASSPORTID);
+  getString("Enter PassportID (length >= 7 & <= 10, e.g. 39765402)",rm->passportID, MAX_PASSPORTID);
   rm->seatRow = getInt("Enter seat row") - 1;
   rm->seatColumn = getInt("Enter seat column") - 1;
 

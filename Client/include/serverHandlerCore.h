@@ -14,10 +14,14 @@
 #define SEND_DATA_OK 2
 #define SERVER_DISCONNECTED 3
 
-int serverHandler(int socket);
 int sendSimpleCmd(int socket, simpleCommand * simpleCmd);
 int sendSimpleMsg(int socket, simpleMessage * simpleMsg);
 int sendSimpleMsg_w_bytes(int socket, simpleMessage * simpleMsg, int msg_bytes);
 int getDataAndLengthFromServer(int socket, char * * data, int * bytes);
+
+//Test functions
+int sendDataToServer(int socket, char * data, int bytes);
+int getDataFromServer(int socket, char * buffer, int max_bytes, int * data_size);
+int getHelloFromServer(int socket, int isAdmin);
 
 #endif

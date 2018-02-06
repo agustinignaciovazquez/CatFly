@@ -1,7 +1,7 @@
 TARGET = Tests.app
 TARGET_ALL = $(TARGET)
 LIBS =  -lm -lsqlite3 -lpthread
-INCLUDE_DIRS = './include/' '../Common/include/'
+INCLUDE_DIRS = './include/' '../Common/include/' '../Client/include/'
 CC = gcc
 CFLAGS = -g -Wall
 CFLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
@@ -14,7 +14,8 @@ test : $(TARGET_TEST)
 
 OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 OBJECTS += $(patsubst %.c, %.o, $(wildcard ../Common/*.c))
-
+OBJECTS += $(patsubst %.c, %.o, $(wildcard ../Client/serverHandlerCore.c))
+OBJECTS += $(patsubst %.c, %.o, $(wildcard ../Client/clientCore.c))
 %.o: %.c 
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
@@ -27,6 +28,7 @@ clean:
 	-rm -f *.o
 	-rm -f *.db
 	-rm -f ../Common/*.o
+	-rm -f ../Client/*.o
 	-rm -f $(TARGET)
 	
 

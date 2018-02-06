@@ -3,7 +3,6 @@
 
 #include <sys/socket.h>
 #include <arpa/inet.h> //inet_addr
-#include "serverHandlerCore.h" 
 
 #define CLIENT_TIMEOUT 7
 
@@ -12,4 +11,6 @@
 /* using http://www.binarytides.com/server-client-example-c-sockets-linux/ part of code */
 int connectToServer(const char * address, int port);
 
+//Tests usage
+int createSocket(const char * address, int port);
 #endif 

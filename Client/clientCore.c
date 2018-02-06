@@ -4,18 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int createSocket(const char * address, int port);
 void configureServerSettings(const char * address, int port, struct sockaddr_in * serverAddr);
-
-int connectToServer(const char * address, int port){
-	int socket;
-
-    socket = createSocket(address, port);
-    if(socket == SERVER_CONNECTION_ERROR)
-    	return SERVER_CONNECTION_ERROR;
-    
-    return serverHandler(socket);
-} 
 
 int createSocket(const char * address, int port){
 	int sock;
