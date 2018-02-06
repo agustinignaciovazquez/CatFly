@@ -8,19 +8,23 @@
 
 int main(int argc , char *argv[]){
 	//Serialize/Deserialize Tests
-	/*testSerialSimpleCMD();
+	testSerialSimpleCMD();
 	testSerialFlight();
 	testSerialFlights();
 	testSerialPlanes();
 	testSerialRes();
 	testSerialFlightRes();
-	testSerialSimpleMsg();*/
+	testSerialSimpleMsg();
+
 	//Server Tests
 	fuzzTest();
 	fuzzTest_in_HELLO_REQ();
 	notAdminTest();
-	//simpleDDoSS();
-	efficientDDoSS();
+	reservationTest();
+	cancellationTest();
+	
+	/*Not really tests but chaos
+	simpleDDoSS(); or efficientDDoSS();*/
     return 0;
 }  
  
