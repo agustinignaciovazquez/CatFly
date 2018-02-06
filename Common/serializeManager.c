@@ -28,6 +28,7 @@ char * serializeSimpleCommand(simpleCommand * cmd, int * size){
 	return s;
 }
 
+/* If msg_bytes equals or less than 0, copies bytes until '\0'*/
 char * serializeSimpleMessage(simpleMessage * smgs, int * size, int msg_bytes){
 	char * s;
 	s = malloc(SIMPLE_MSG_SERIALIZE_BYTES);

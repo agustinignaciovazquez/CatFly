@@ -18,7 +18,7 @@ int main(int argc , char *argv[]){
   	char * address = SERVER_ADDR;
   	int port = SERVER_PORT;
 
-  	//TODO add address and port to args
+  	//Check foreground arg
   	if(argc > 1){
   			foreground = (strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "--foreground") == 0)? TRUE : FALSE;
   	}
