@@ -18,9 +18,11 @@ sem_t * openSemaphore(const char * semaphoreKey, int val){
 
     return semaphore;
 }
+
 sem_t * openMutexSemaphore(const char * semaphoreKey){
 	return openSemaphore(semaphoreKey,1);
 }
+
 sem_t * openChildsSemaphore(const char * semaphoreKey){
 	return openSemaphore(semaphoreKey,MAX_CHILD_PROCESS);
 }

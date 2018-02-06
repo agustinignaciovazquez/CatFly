@@ -1,5 +1,6 @@
 #include "serializeTest.h"
 #include "serverSecurityTests.h"
+#include "DoSTest.h"
 #include "constants.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +19,7 @@ int main(int argc , char *argv[]){
 	fuzzTest();
 	fuzzTest_in_HELLO_REQ();
 	notAdminTest();
+	//simpleDDoSS();
     return 0;
 }  
  

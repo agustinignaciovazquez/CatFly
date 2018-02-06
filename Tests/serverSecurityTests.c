@@ -12,7 +12,6 @@
 #define BUF_SIZE 7777
 
 void fillRandomData(char * buff, int bytes);
-int sendFuzzData(int socket);
 
 void notAdminTest(){
 	int con_status, socket;
